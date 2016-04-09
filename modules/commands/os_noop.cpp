@@ -46,7 +46,7 @@ class CommandOSNOOP : public Command
 			{
 				User *u2 = it->second;
 
-				if (u2->server == s && u2->HasMode("OPER"))
+				if (u2->server == s && u2->HasMode("OPER") && !u2->HasPriv("noop/exempt"))
 					u2->Kill(*source.service, reason);
 			}
 		}
@@ -88,7 +88,7 @@ class OSNOOP : public Module
 	void OnUserModeSet(const MessageSource &, User *u, const Anope::string &mname) anope_override
 	{
 		Anope::string *setter;
-		if (mname == "OPER" && (setter = noop.Get(u->server)))
+		if (mname == "OPER" && (setter = noop.Get(u->server)) && !u->HasPriv("noop/exempt"))
 		{
 			Anope::string reason = "NOOP command used by " + *setter;
 			BotInfo *OperServ = Config->GetClient("OperServ");
