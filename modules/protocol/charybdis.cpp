@@ -31,13 +31,29 @@ class ChannelModeLargeBan : public ChannelMode
 
 class CharybdisProto : public IRCDProto
 {
+	BotInfo *FindIntroduced()
+	{
+		BotInfo *bi = Config->GetClient("OperServ");
+		
+		if (bi && bi->introduced)
+			return bi;
+		
+		for (botinfo_map::iterator it = BotListByNick->begin(), it_end = BotListByNick->end(); it != it_end; ++it)
+			if (it->second->introduced)
+				return it->second;
+			
+		return NULL;
+	}
+
  public:
+	
 	CharybdisProto(Module *creator) : IRCDProto(creator, "Charybdis 3.4+")
 	{
 		DefaultPseudoclientModes = "+oiS";
 		CanCertFP = true;
 		CanSNLine = true;
 		CanSQLine = true;
+		CanSQLineChannel = true;
 		CanSZLine = true;
 		CanSVSNick = true;
 		CanSVSHold = true;
@@ -54,7 +70,6 @@ class CharybdisProto : public IRCDProto
 	void SendSGLineDel(const XLine *x) anope_override { ratbox->SendSGLineDel(x); }
 	void SendAkill(User *u, XLine *x) anope_override { ratbox->SendAkill(u, x); }
 	void SendAkillDel(const XLine *x) anope_override { ratbox->SendAkillDel(x); }
-	void SendSQLineDel(const XLine *x) anope_override { ratbox->SendSQLineDel(x); }
 	void SendJoin(User *user, Channel *c, const ChannelStatus *status) anope_override { ratbox->SendJoin(user, c, status); }
 	void SendServer(const Server *server) anope_override { ratbox->SendServer(server); }
 	void SendChannel(Channel *c) anope_override { ratbox->SendChannel(c); }
@@ -77,7 +92,18 @@ class CharybdisProto : public IRCDProto
 
 	void SendSQLine(User *, const XLine *x) anope_override
 	{
-		UplinkSocket::Message(Me) << "RESV * " << x->mask << " :" << x->GetReason();
+		/* Calculate the time left before this would expire, capping it at 2 days */
+		time_t timeleft = x->expires - Anope::CurTime;
+		
+		if (timeleft > 172800 || !x->expires)
+			timeleft = 172800;
+		
+		UplinkSocket::Message(FindIntroduced()) << "ENCAP * RESV " << timeleft << " " << x->mask << " 0 :" << x->GetReason();
+	}
+	
+	void SendSQLineDel(const XLine *x) anope_override
+	{
+		UplinkSocket::Message(Config->GetClient("OperServ")) << "ENCAP * UNRESV " << x->mask;
 	}
 
 	void SendConnect() anope_override
@@ -169,24 +195,33 @@ class CharybdisProto : public IRCDProto
 
 struct IRCDMessageEncap : IRCDMessage
 {
-	IRCDMessageEncap(Module *creator) : IRCDMessage(creator, "ENCAP", 3) { SetFlag(IRCDMESSAGE_SOFT_LIMIT);}
+	IRCDMessageEncap(Module *creator) : IRCDMessage(creator, "ENCAP", 3)
+	{
+		SetFlag(IRCDMESSAGE_SOFT_LIMIT);
+	}
 
 	void Run(MessageSource &source, const std::vector<Anope::string> &params) anope_override
 	{
-		User *u = source.GetUser();
-
 		// In a burst, states that the source user is logged in as the account.
 		if (params[1] == "LOGIN" || params[1] == "SU")
 		{
+			User *u = source.GetUser();
 			NickCore *nc = NickCore::Find(params[2]);
-			if (!nc)
+
+			if (!u || !nc)
 				return;
+
 			u->Login(nc);
 		}
 		// Received: :42XAAAAAE ENCAP * CERTFP :3f122a9cc7811dbad3566bf2cec3009007c0868f
-		if (params[1] == "CERTFP")
+		else if (params[1] == "CERTFP")
 		{
+			User *u = source.GetUser();
+			if (!u)
+				return;
+
 			u->fingerprint = params[2];
+
 			FOREACH_MOD(OnFingerprint, (u));
 		}
 		/*
@@ -200,7 +235,7 @@ struct IRCDMessageEncap : IRCDMessage
 		 *
 		 * Charybdis only accepts messages from SASL agents; these must have umode +S
 		 */
-		if (params[1] == "SASL" && SASL::sasl && params.size() >= 6)
+		else if (params[1] == "SASL" && SASL::sasl && params.size() >= 6)
 		{
 			SASL::Message m;
 			m.source = params[2];
