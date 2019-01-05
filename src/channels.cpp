@@ -838,7 +838,7 @@ void Channel::SetCorrectModes(User *user, bool give_modes)
 	FOREACH_MOD(OnSetCorrectModes, (user, this, u_access, give_modes, take_modes));
 
 	/* Never take modes from ulines */
-	if (user->server->IsULined())
+	if (user->IsProtected())
 		take_modes = false;
 
 	/* whether or not we are giving modes */
