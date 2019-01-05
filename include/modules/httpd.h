@@ -1,6 +1,6 @@
 /*
  *
- * (C) 2012-2016 Anope Team
+ * (C) 2012-2019 Anope Team
  * Contact us at team@anope.org
  *
  * Please read COPYING and README for further details.
@@ -23,7 +23,7 @@ struct HTTPReply
 {
 	HTTPError error;
 	Anope::string content_type;
-	std::map<Anope::string, Anope::string> headers;
+	std::map<Anope::string, Anope::string, ci::less> headers;
 	typedef std::list<std::pair<Anope::string, Anope::string> > cookie;
 	std::vector<cookie> cookies;
 
@@ -141,7 +141,7 @@ class HTTPProvider : public ListenSocket, public Service
 	unsigned short port;
 	bool ssl;
  public:
-	Anope::string ext_ip;
+	std::vector<Anope::string> ext_ips;
 	std::vector<Anope::string> ext_headers;
 
 	HTTPProvider(Module *c, const Anope::string &n, const Anope::string &i, const unsigned short p, bool s) : ListenSocket(i, p, i.find(':') != Anope::string::npos), Service(c, "HTTPProvider", n), ip(i), port(p), ssl(s) { }
@@ -227,6 +227,9 @@ namespace HTTPUtils
 					break;
 				case '"':
 					dst += "&quot;";
+					break;
+				case '&':
+					dst += "&amp;";
 					break;
 				default:
 					dst += src[i];

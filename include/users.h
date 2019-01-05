@@ -1,7 +1,7 @@
 /*
  *
  * (C) 2008-2011 Robin Burchell <w00t@inspircd.org>
- * (C) 2003-2016 Anope Team <team@anope.org>
+ * (C) 2003-2019 Anope Team <team@anope.org>
  *
  * Please read COPYING and README for further details.
  *
@@ -347,10 +347,9 @@ class CoreExport User : public virtual Base, public Extensible, public CommandRe
 
 	/* Returns a mask that will most likely match any address the
 	 * user will have from that location.  For IP addresses, wildcards the
-	 * appropriate subnet mask (e.g. 35.1.1.1 -> 35.*; 128.2.1.1 -> 128.2.*);
-	 * for named addresses, wildcards the leftmost part of the name unless the
-	 * name only contains two parts.  If the username begins with a ~, delete
-	 * it.
+	 * last octet (e.g. 35.1.1.1 -> 35.1.1.*). for named addresses, wildcards
+	 * the leftmost part of the name unless the  name only contains two parts.
+	 * If the username begins with a ~, replace with *.
 	 */
 	Anope::string Mask() const;
 

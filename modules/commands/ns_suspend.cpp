@@ -1,6 +1,6 @@
 /* NickServ core functions
  *
- * (C) 2003-2016 Anope Team
+ * (C) 2003-2019 Anope Team
  * Contact us at team@anope.org
  *
  * Please read COPYING and README for further details.
@@ -81,7 +81,7 @@ class CommandNSSuspend : public Command
 		else
 		{
 			expiry_secs = Anope::DoTime(expiry);
-			if (expiry_secs == -1)
+			if (expiry_secs < 0)
 			{
 				source.Reply(BAD_EXPIRY_TIME);
 				return;

@@ -1,6 +1,6 @@
 /*
  *
- * (C) 2011-2016 Anope Team
+ * (C) 2011-2019 Anope Team
  * Contact us at team@anope.org
  *
  * Please read COPYING and README for further details.
@@ -44,6 +44,8 @@ class ForbidService : public Service
 	virtual ForbidData* CreateForbid() = 0;
 
 	virtual ForbidData *FindForbid(const Anope::string &mask, ForbidType type) = 0;
+
+	virtual ForbidData *FindForbidExact(const Anope::string &mask, ForbidType type) = 0;
 
 	virtual std::vector<ForbidData *> GetForbids() = 0;
 };

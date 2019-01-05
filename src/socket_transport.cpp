@@ -1,6 +1,6 @@
 /*
  *
- * (C) 2003-2016 Anope Team
+ * (C) 2003-2019 Anope Team
  * Contact us at team@anope.org
  *
  * Please read COPYING and README for further details.
@@ -32,7 +32,7 @@ bool BufferedSocket::ProcessRead()
 		return false;
 	if (len < 0)
 		return SocketEngine::IgnoreErrno();
-	
+
 	tbuffer[len] = 0;
 	this->read_buffer.append(tbuffer);
 	this->recv_len = len;
@@ -130,7 +130,7 @@ bool BinarySocket::ProcessRead()
 	int len = this->io->Recv(this, tbuffer, sizeof(tbuffer));
 	if (len <= 0)
 		return false;
-	
+
 	return this->Read(tbuffer, len);
 }
 
@@ -196,4 +196,3 @@ bool BinarySocket::Read(const char *buffer, size_t l)
 {
 	return true;
 }
-

@@ -1,6 +1,6 @@
 /* smtp stuff handler for win32.
  *
- * (C) 2003-2016 Anope Team
+ * (C) 2003-2019 Anope Team
  * Contact us at team@anope.org
  *
  * Please read COPYING and README for further details.
@@ -105,6 +105,18 @@ static std::string get_logname(struct tm *tm = NULL)
 	strftime(timestamp, sizeof(timestamp), "%Y%m%d", tm);
 	std::string name = std::string("anopesmtp.") + timestamp;
 	return name;
+}
+
+/* TimeStamp for Email Header */
+static std::string GetTimeStamp()
+{
+	char tbuf[256];
+	time_t t = time(NULL);
+	struct tm *tm = localtime(&t);
+
+	strftime(tbuf, sizeof(tbuf) - 1, "%a, %d %b %Y %H:%M:%S %z", tm);
+
+	return tbuf;
 }
 
 /* Log stuff to the log file with a datestamp.  Note that errno is
@@ -288,7 +300,7 @@ int smtp_send_email()
 
 	if (!smtp_send("HELO anope\r\n"))
 	{
-		alog("SMTP: error writting to socket");
+		alog("SMTP: error writing to socket");
 		return 0;
 	}
 
@@ -311,7 +323,7 @@ int smtp_send_email()
 
 	if (!smtp_send(buf))
 	{
-		alog("SMTP: error writting to socket");
+		alog("SMTP: error writing to socket");
 		return 0;
 	}
 
@@ -331,7 +343,7 @@ int smtp_send_email()
 
 	if (!smtp_send(buf))
 	{
-		alog("SMTP: error writting to socket");
+		alog("SMTP: error writing to socket");
 		return 0;
 	}
 
@@ -350,7 +362,7 @@ int smtp_send_email()
 
 	if (!smtp_send("DATA\r\n"))
 	{
-		alog("SMTP: error writting to socket");
+		alog("SMTP: error writing to socket");
 		return 0;
 	}
 
@@ -370,13 +382,13 @@ int smtp_send_email()
 	for (std::vector<std::string>::const_iterator it = smail.smtp_headers.begin(), it_end = smail.smtp_headers.end(); it != it_end; ++it)
 		if (!smtp_send(it->c_str()))
 		{
-			alog("SMTP: error writting to socket");
+			alog("SMTP: error writing to socket");
 			return 0;
 		}
 
 	if (!smtp_send("\r\n"))
 	{
-		alog("SMTP: error writting to socket");
+		alog("SMTP: error writing to socket");
 		return 0;
 	}
 
@@ -386,7 +398,7 @@ int smtp_send_email()
 		{
 			if (!smtp_send(it->c_str()))
 			{
-				alog("SMTP: error writting to socket");
+				alog("SMTP: error writing to socket");
 				return 0;
 			}
 		}
@@ -395,7 +407,20 @@ int smtp_send_email()
 
 	if (!smtp_send("\r\n.\r\n"))
 	{
-		alog("SMTP: error writting to socket");
+		alog("SMTP: error writing to socket");
+		return 0;
+	}
+
+	if (!smtp_read(buf, 1024))
+	{
+		alog("SMTP: error reading buffer");
+		return 0;
+	}
+
+	code = smtp_get_code(buf);
+	if (code != 250)
+	{
+		alog("SMTP: error expected code 250 got %d",code);
 		return 0;
 	}
 
@@ -404,7 +429,24 @@ int smtp_send_email()
 
 void smtp_disconnect()
 {
-	smtp_send("QUIT\r\n");
+	char buf[1024];
+
+	if (!smtp_send("QUIT\r\n"))
+	{
+		alog("SMTP: error writing to socket");
+	}
+
+	if (!smtp_read(buf, 1024))
+	{
+		alog("SMTP: error reading buffer");
+	}
+
+	int code = smtp_get_code(buf);
+	if (code != 221)
+	{
+		alog("SMTP: error expected code 221 got %d",code);
+	}
+
 	ano_sockclose(smail.sock);
 }
 
@@ -417,7 +459,7 @@ int main(int argc, char *argv[])
 
 	if (argc == 1)
 		return 0;
-	
+
 	if (argc == 3 && !strcmp(argv[2], "--debug"))
 		smtp_debug = 1;
 
@@ -468,6 +510,7 @@ int main(int argc, char *argv[])
 				break;
 			else
 			{
+				smail.smtp_headers.push_back("Date: " + GetTimeStamp() + "\r\n");
 				headers_done = true;
 				smail.smtp_body.push_back(strip(buf) + "\r\n");
 			}

@@ -1,6 +1,6 @@
 /* ChanServ core functions
  *
- * (C) 2003-2016 Anope Team
+ * (C) 2003-2019 Anope Team
  * Contact us at team@anope.org
  *
  * Please read COPYING and README for further details.
@@ -53,7 +53,7 @@ struct LogSettingImpl : LogSetting, Serializable
 		ChannelInfo *ci = ChannelInfo::Find(sci);
 		if (ci == NULL)
 			return NULL;
-	
+
 		LogSettingImpl *ls;
 		if (obj)
 			ls = anope_dynamic_static_cast<LogSettingImpl *>(obj);

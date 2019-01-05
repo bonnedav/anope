@@ -1,5 +1,5 @@
 /*
- * (C) 2003-2016 Anope Team
+ * (C) 2003-2019 Anope Team
  * Contact us at team@anope.org
  *
  * Please read COPYING and README for further details.
@@ -21,7 +21,7 @@ bool WebCPanel::Confirm::OnRequest(HTTPProvider *server, const Anope::string &pa
 		if (!email.empty())
 			params.push_back(email);
 
-		WebPanel::RunCommand(user, NULL, "NickServ", "nickserv/register", params, replacements);
+		WebPanel::RunCommand(client, user, NULL, "NickServ", "nickserv/register", params, replacements);
 	}
 
 	TemplateFileServer page("confirm.html");
@@ -29,4 +29,3 @@ bool WebCPanel::Confirm::OnRequest(HTTPProvider *server, const Anope::string &pa
 	page.Serve(server, page_name, client, message, reply, replacements);
 	return true;
 }
-

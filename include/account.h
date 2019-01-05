@@ -1,6 +1,6 @@
 /*
  *
- * (C) 2003-2016 Anope Team
+ * (C) 2003-2019 Anope Team
  * Contact us at team@anope.org
  *
  * Please read COPYING and README for further details.
@@ -25,7 +25,7 @@ extern CoreExport Serialize::Checker<nickalias_map> NickAliasList;
 extern CoreExport Serialize::Checker<nickcore_map> NickCoreList;
 
 /* A registered nickname.
- * It matters that Base is here before Extensible (it is inherited by Serializable) 
+ * It matters that Base is here before Extensible (it is inherited by Serializable)
  */
 class CoreExport NickAlias : public Serializable, public Extensible
 {
@@ -214,7 +214,7 @@ class CoreExport NickCore : public Serializable, public Extensible
 	 * @return The account, if it exists
 	 */
 	static NickCore* Find(const Anope::string &nick);
-	
+
 	void AddChannelReference(ChannelInfo *ci);
 	void RemoveChannelReference(ChannelInfo *ci);
 	void GetChannelReferences(std::deque<ChannelInfo *> &queue);
@@ -234,7 +234,7 @@ class CoreExport IdentifyRequest
 	std::set<Module *> holds;
 	bool dispatched;
 	bool success;
-	
+
 	static std::set<IdentifyRequest *> Requests;
 
  protected:
@@ -246,6 +246,7 @@ class CoreExport IdentifyRequest
 	virtual void OnSuccess() = 0;
 	virtual void OnFail() = 0;
 
+	Module *GetOwner() const { return owner; }
 	const Anope::string &GetAccount() const { return account; }
 	const Anope::string &GetPassword() const { return password; }
 

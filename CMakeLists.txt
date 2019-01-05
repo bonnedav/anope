@@ -45,20 +45,20 @@ if(MINOR_VERSION GREATER 5)
   set(CMAKE242_OR_BETTER TRUE)
 else(MINOR_VERSION GREATER 5)
   set(CMAKE26_OR_BETTER FALSE)
-  # Also detect if we are using CMake 2.4.8 or better, the FIND sub-command of list() is non-existent in earlier versions
+  # Also detect if we are using CMake 2.4.8 or better, the FIND sub-command of list() is nonexistent in earlier versions
   if(PATCH_VERSION GREATER 7)
     set(CMAKE248_OR_BETTER TRUE)
     set(CMAKE244_OR_BETTER TRUE)
     set(CMAKE242_OR_BETTER TRUE)
   else(PATCH_VERSION GREATER 7)
     set(CMAKE248_OR_BETTER FALSE)
-    # Also detect if we are using CMake 2.4.4 or better, the CheckCXXCompilerFlag module and SORT sub-command of list() are non-existent in earlier versions
+    # Also detect if we are using CMake 2.4.4 or better, the CheckCXXCompilerFlag module and SORT sub-command of list() are nonexistent in earlier versions
     if(PATCH_VERSION GREATER 3)
       set(CMAKE244_OR_BETTER TRUE)
       set(CMAKE242_OR_BETTER TRUE)
     else(PATCH_VERSION GREATER 3)
       set(CMAKE244_OR_BETTER FALSE)
-      # ALSO detect if we are using CMake 2.4.2 or better, the APPEND sub-command of list() is non-existent in earlier versions
+      # ALSO detect if we are using CMake 2.4.2 or better, the APPEND sub-command of list() is nonexistent in earlier versions
       if(PATCH_VERSION GREATER 1)
         set(CMAKE242_OR_BETTER TRUE)
       else(PATCH_VERSION GREATER 1)
@@ -541,14 +541,14 @@ if(EXISTS "${CMAKE_ROOT}/Modules/CPack.cmake")
       "bin\\\\anope.bat\\\" \\\"-debug -nofork" "Anope IRC Services (Debug and Window Logging)"
       "bin\\\\anope.bat\\\" \\\"-nofork" "Anope IRC Services (Window Logging)"
       "bin\\\\anope.bat\\\" \\\"-nothird" "Anope IRC Services (No Third Party Modules)"
-      "http://www.anope.org/" "Anope Web Site"
+      "https://www.anope.org/" "Anope Web Site"
     )
     # The following doesn't work, but a bug report has been filed about it
     #set(CPACK_CREATE_DESKTOP_LINK_${SERVICES_BINARY} TRUE)
     set(CPACK_NSIS_MUI_ICON "${Anope_SOURCE_DIR}/src\\\\win32\\\\anope-icon.ico")
     set(CPACK_NSIS_MUI_UNIICON "${Anope_SOURCE_DIR}/src\\\\win32\\\\anope-icon.ico")
     set(CPACK_NSIS_INSTALLED_ICON_NAME "${SERVICES_BINARY}")
-    set(CPACK_NSIS_URL_INFO_ABOUT "http://www.anope.org/")
+    set(CPACK_NSIS_URL_INFO_ABOUT "https://www.anope.org/")
     set(CPACK_NSIS_COMPRESSOR "/SOLID lzma")
   endif(WIN32)
   set(CPACK_SOURCE_PACKAGE_FILE_NAME "anope-${VERSION_FULL_NOBUILD}-source")

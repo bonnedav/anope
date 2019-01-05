@@ -1,6 +1,6 @@
 /*
  *
- * (C) 2008-2016 Anope Team
+ * (C) 2008-2019 Anope Team
  * Contact us at team@anope.org
  *
  * Please read COPYING and README for further details.
@@ -231,7 +231,7 @@ class CoreExport ChannelInfo : public Serializable, public Extensible
 	 */
 	Anope::string GetIdealBan(User *u) const;
 
-	/** Finds a ChannelInfo 
+	/** Finds a ChannelInfo
 	 * @param name channel name to lookup
 	 * @return the ChannelInfo associated with the channel
 	 */

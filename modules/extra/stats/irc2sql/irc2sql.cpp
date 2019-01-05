@@ -1,10 +1,19 @@
+/*
+ *
+ * (C) 2013-2019 Anope Team
+ * Contact us at team@anope.org
+ *
+ * Please read COPYING and README for further details.
+ */
+
 #include "irc2sql.h"
 
 void IRC2SQL::OnShutdown()
 {
 	// TODO: test if we really have to use blocking query here
 	// (sometimes m_mysql get unloaded before the other thread executed all queries)
-	SQL::Result r = this->sql->RunQuery(SQL::Query("CALL " + prefix + "OnShutdown()"));
+	if (this->sql)
+		SQL::Result r = this->sql->RunQuery(SQL::Query("CALL " + prefix + "OnShutdown()"));
 	quitting = true;
 }
 
@@ -195,7 +204,10 @@ void IRC2SQL::OnChannelCreate(Channel *c)
 	query.SetValue("channel", c->name);
 	query.SetValue("topic", c->topic);
 	query.SetValue("topicauthor", c->topic_setter);
-	query.SetValue("topictime", c->topic_ts);
+	if (c->topic_ts > 0)
+		query.SetValue("topictime", c->topic_ts);
+	else
+		query.SetValue("topictime", "NULL", false);
 	query.SetValue("modes", c->GetModes(true,true));
 	this->RunQuery(query);
 }
@@ -223,10 +235,32 @@ void IRC2SQL::OnJoinChannel(User *u, Channel *c)
 
 EventReturn IRC2SQL::OnChannelModeSet(Channel *c, MessageSource &setter, ChannelMode *mode, const Anope::string &param)
 {
-	query = "UPDATE `" + prefix + "chan` SET modes=@modes@ WHERE channel=@channel@";
-	query.SetValue("channel", c->name);
-	query.SetValue("modes", c->GetModes(true,true));
-	this->RunQuery(query);
+	if (mode->type == MODE_STATUS)
+	{
+		User *u = User::Find(param);
+		if (u == NULL)
+			return EVENT_CONTINUE;
+
+		ChanUserContainer *cc = u->FindChannel(c);
+		if (cc == NULL)
+			return EVENT_CONTINUE;
+
+		query = "UPDATE `" + prefix + "user` AS u, `" + prefix + "ison` AS i, `" + prefix + "chan` AS c"
+				" SET i.modes=@modes@"
+				" WHERE u.nick=@nick@ AND c.channel=@channel@"
+				" AND u.nickid = i.nickid AND c.chanid = i.chanid";
+		query.SetValue("nick", u->nick);
+		query.SetValue("modes", cc->status.Modes());
+		query.SetValue("channel", c->name);
+		this->RunQuery(query);
+	}
+	else
+	{
+		query = "UPDATE `" + prefix + "chan` SET modes=@modes@ WHERE channel=@channel@";
+		query.SetValue("channel", c->name);
+		query.SetValue("modes", c->GetModes(true,true));
+		this->RunQuery(query);
+	}
 	return EVENT_CONTINUE;
 }
 

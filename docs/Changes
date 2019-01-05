@@ -1,5 +1,39 @@
-Anope Version 2.0.5-git
+Anope Version 2.0.7-git
 -------------------
+
+Anope Version 2.0.6
+-------------------
+Log client IP for web clients running commands via webcpanel
+Fix log file path for the config file could not be opened log message
+Allow nickserv/group to be used via XMLRPC
+Fix logsearch without wildcards
+Support cidr exempts in m_dnsbl
+Add support for IPv6 dnsbls
+Add +u and +L channel modes for ircd-hybrid
+Set +x after hostserv/off on InspIRCd and UnrealIRCd
+Fix chanserv/mode not being able to set extbans
+Send CHGIDENT/CHGHOST on SVSLOGIN on InspIRCd
+Fix escaping replies from commands in webcpanel
+Enable require_oper for all opers added via operserv/oper
+Advertise SASL mechanisms to UnrealIRCd servers
+
+Anope Version 2.0.5
+-------------------
+Fix negative levels to not match users with negative access
+Fix memo sender to always be the account name of the sender
+Allow unregistered users to use the ChanServ seen command
+Fix secureops to not be enforced on operators with the chanserv/administration privilege
+Fix command name in HELP syntax messages to always be upper case
+Show unconfirmed nickname messages on registration in webcpanel
+Fix NickServ SET EMAIL to be executable via XMLRPC
+Fix OperServ USERLIST/CHANLIST to accept regexes
+Allow OperServ USERLIST to also match realname syntax (n!u@h#r)
+Fix db_old importing languages to use the UTF-8 version
+Fix m_dns to return REFUSED if no answers could be found
+Fix ns_maxemail to be case insensitive
+Add MemoServ READ ALL command
+Add support for NickServ GROUP to be executed via XMLRPC
+Add support for logging hostname/ip of SASL authentication attempts, if supported by IRCd
 
 Anope Version 2.0.4
 -------------------
@@ -91,7 +125,7 @@ Anope Version 2.0.0
 Added irc2sql stats module
 
 Anope Version 1.9.9
---------------------
+-------------------
 A Added a better webpanel template, removed the old one
 A Added SQL logging support
 A Added Redis database support
@@ -103,7 +137,7 @@ F Fixed setting BotServ's default settings in the config
 F Fixed some names of config items, including NickServ's kill protect
 
 Anope Version 1.9.8
---------------------
+-------------------
 A Ability to configure fantasy commands in the config
 A Add SVSJOIN and SVSPART commands
 F Fix "leave" channel log level from not logging
@@ -115,7 +149,7 @@ F Fix crash in os_forbid with expiring entries
 F Fix several issues with db_sql_live
 
 Anope Version 1.9.7
---------------------
+-------------------
 A Added ability for using regex as patterns for various commands
 A Extended ability of operserv/akill to also match against nick and realname
 A Added chanserv:require configuration option
@@ -125,7 +159,7 @@ A Added a web panel
 A db_sql_live now allows all tables to be "live", not just a select few
 
 Anope Version 1.9.6
---------------------
+-------------------
 A Added ability to configure emails sent by services
 A Added chanserv/up and chanserv/down
 A Added m_proxyscan
@@ -144,7 +178,7 @@ F Fixed crash in /os oper info
 F Fixed eventfd Config check to work properly on OpenVZ
 
 Anope Version 1.9.5
---------------------
+-------------------
 A Extended LDAP support
 A Added os_oper, os_kill, os_forbid, m_statusupdate, cs_sync, and bs_autoassign
 A Added a new configuration file format
@@ -162,7 +196,7 @@ F Fixed setting -P on channels with only a botserv bot in it
 F Fixed modemanager complaining about prefixless modes on InspIRCd
 
 Anope Version 1.9.4
---------------------
+-------------------
 A Automatically set channel founder to the user with the highest access if there is no successor
 A /chanserv clone command to copy settings from one channel to another.
 A /chanserv mode command
@@ -183,7 +217,7 @@ F Some failed logic in /operserv exception that prevents proper exceptions from 
 F Fixed the anope_os_sxlines MySQL table and code to work after restarting
 
 Anope Version 1.9.3
---------------------
+-------------------
 A Added italics BotServ kicks support
 A Tell users when their nicks expire in /ns glist and /ns info
 A Added SSL support
@@ -210,7 +244,7 @@ F Anoperc start/stop to send the globaloncycle global, and fixed anoperc rehash 
 F Fixed a potential crash if HostServ or BotServ was disbled
 
 Anope Version 1.9.2
---------------------
+-------------------
 A K alias to chanserv kick command
 A KB alias to chanserv ban command
 A The ability to register empty nonregistered channels
@@ -241,7 +275,7 @@ F ms_rsend to really work
 F SQUITing juped servers on InspIRCd1.2+
 
 Anope Version 1.9.1
---------------------
+-------------------
 F Don't enforce akick/forbidden/etc.-restrictions on clients on ulined servers.
 F Remove modules_unload_all fini + hack that goes with it.
 F Signal handling cleanup.
@@ -282,7 +316,7 @@ Provided by Liber <Liber@jasonirc.net> - 2009
 F Support operoverride and such things (stop reversing changes from nonopped people where unnecessary)
 
 Anope Version 1.9.0
---------------------
+-------------------
 F Modified compile to use g++
 F Improve protocol modules support (classes, virtual methods, etc)
 F Move core services to use BotInfo

@@ -1,5 +1,5 @@
 /*
- * (C) 2003-2016 Anope Team
+ * (C) 2003-2019 Anope Team
  * Contact us at team@anope.org
  *
  * Please read COPYING and README for further details.
@@ -36,6 +36,14 @@ class WebpanelRequest : public IdentifyRequest
 			return;
 		}
 
+		// Rate limit logins to 1/sec
+		time_t *last_login = na->nc->GetExt<time_t>("webcpanel_last_login");
+		if (last_login != NULL && Anope::CurTime == *last_login)
+		{
+			this->OnFail();
+			return;
+		}
+
 		Anope::string id;
 		for (int i = 0; i < 64; ++i)
 		{
@@ -48,6 +56,7 @@ class WebpanelRequest : public IdentifyRequest
 
 		na->Extend<Anope::string>("webcpanel_id", id);
 		na->Extend<Anope::string>("webcpanel_ip", client->GetIP());
+		na->nc->Extend<time_t>("webcpanel_last_login", Anope::CurTime);
 
 		{
 			HTTPReply::cookie c;
@@ -56,7 +65,7 @@ class WebpanelRequest : public IdentifyRequest
 			reply.cookies.push_back(c);
 		}
 
-		{			
+		{
 			HTTPReply::cookie c;
 			c.push_back(std::make_pair("id", id));
 			c.push_back(std::make_pair("Path", "/"));
@@ -91,6 +100,30 @@ bool WebCPanel::Index::OnRequest(HTTPProvider *server, const Anope::string &page
 	if (!user.empty() && !pass.empty())
 	{
 		// Rate limit check.
+		Anope::string ip = client->clientaddr.addr();
+
+		Anope::hash_map<time_t>::iterator it = last_login_attempt.find(ip);
+		if (it != last_login_attempt.end())
+		{
+			time_t last_time = it->second;
+
+			if (last_time == Anope::CurTime)
+			{
+				replacements["INVALID_LOGIN"] = "Rate limited";
+				TemplateFileServer page("login.html");
+				page.Serve(server, page_name, client, message, reply, replacements);
+				return true;
+			}
+		}
+
+		// don't let ip hash grow too long
+		if (Anope::CurTime > last_clear + FLUSH_TIME)
+		{
+			last_login_attempt.clear();
+			last_clear = Anope::CurTime;
+		}
+
+		last_login_attempt[ip] = Anope::CurTime;
 
 		WebpanelRequest *req = new WebpanelRequest(me, reply, message, server, page_name, client, replacements, user, pass);
 		FOREACH_MOD(OnCheckAuthentication, (NULL, req));
@@ -102,4 +135,3 @@ bool WebCPanel::Index::OnRequest(HTTPProvider *server, const Anope::string &page
 	page.Serve(server, page_name, client, message, reply, replacements);
 	return true;
 }
-

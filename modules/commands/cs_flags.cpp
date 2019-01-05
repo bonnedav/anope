@@ -1,6 +1,6 @@
 /* ChanServ core functions
  *
- * (C) 2003-2016 Anope Team
+ * (C) 2003-2019 Anope Team
  * Contact us at team@anope.org
  *
  * Please read COPYING and README for further details.
@@ -45,7 +45,7 @@ class FlagsChanAccess : public ChanAccess
 	{
 		if (access->provider->name == "access/flags")
 			return access->AccessSerialize();
-		
+
 		std::set<char> buffer;
 
 		for (std::map<Anope::string, char>::iterator it = defaultFlags.begin(), it_end = defaultFlags.end(); it != it_end; ++it)

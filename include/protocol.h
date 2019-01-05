@@ -1,6 +1,6 @@
 /*
  *
- * (C) 2003-2016 Anope Team
+ * (C) 2003-2019 Anope Team
  * Contact us at team@anope.org
  *
  * Please read COPYING and README for further details.
@@ -195,9 +195,9 @@ class CoreExport IRCDProto : public Service
 	 * initial handshake requirements.
 	 */
 	virtual void SendConnect() = 0;
-	
-	/** Called right before we begin our burst, after we have handshaked successfully with the uplink/
-	 * At this point none of our servesr, users, or channels exist on the uplink
+
+	/** Called right before we begin our burst, after we have handshaked successfully with the uplink.
+	 * At this point none of our servers, users, or channels exist on the uplink
 	 */
 	virtual void SendBOB() { }
 	virtual void SendEOB() { }

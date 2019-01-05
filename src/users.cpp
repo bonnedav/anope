@@ -1,6 +1,6 @@
 /* Routines to maintain a list of online users.
  *
- * (C) 2003-2016 Anope Team
+ * (C) 2003-2019 Anope Team
  * Contact us at team@anope.org
  *
  * Please read COPYING and README for further details.
@@ -141,7 +141,7 @@ void User::ChangeNick(const Anope::string &newnick, time_t ts)
 	/* Sanity check to make sure we don't segfault */
 	if (newnick.empty())
 		throw CoreException("User::ChangeNick() got a bad argument");
-	
+
 	this->super_admin = false;
 	Log(this, "nick") << "(" << this->realname << ") changed nick to " << newnick;
 
@@ -155,7 +155,7 @@ void User::ChangeNick(const Anope::string &newnick, time_t ts)
 		NickAlias *old_na = NickAlias::Find(this->nick);
 		if (old_na && (this->IsIdentified(true) || this->IsRecognized()))
 			old_na->last_seen = Anope::CurTime;
-		
+
 		UserListByNick.erase(this->nick);
 
 		this->nick = newnick;
@@ -401,7 +401,7 @@ void User::Login(NickCore *core)
 
 	if (this->server->IsSynced())
 		Log(this, "account") << "is now identified as " << this->nc->display;
-	
+
 	FOREACH_MOD(OnUserLogin, (this));
 }
 
@@ -409,7 +409,7 @@ void User::Logout()
 {
 	if (!this->nc)
 		return;
-	
+
 	Log(this, "account") << "is no longer identified as " << this->nc->display;
 
 	std::list<User *>::iterator it = std::find(this->nc->users.begin(), this->nc->users.end(), this);
@@ -781,7 +781,7 @@ Anope::string User::Mask() const
 	sockaddrs addr(mhost);
 	if (addr.valid() && addr.sa.sa_family == AF_INET)
 	{
-		size_t dot = mhost.find('.');
+		size_t dot = mhost.rfind('.');
 		mask += mhost.substr(0, dot) + (dot == Anope::string::npos ? "" : ".*");
 	}
 	else
@@ -816,7 +816,7 @@ bool User::BadPassword()
 
 User* User::Find(const Anope::string &name, bool nick_only)
 {
-	if (!nick_only && IRCD->RequiresID)
+	if (!nick_only && IRCD && IRCD->RequiresID)
 	{
 		user_map::iterator it = UserListByUID.find(name);
 		if (it != UserListByUID.end())
@@ -839,4 +839,3 @@ void User::QuitUsers()
 		delete *it;
 	quitting_users.clear();
 }
-

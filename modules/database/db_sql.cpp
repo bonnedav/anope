@@ -1,6 +1,6 @@
 /*
  *
- * (C) 2003-2016 Anope Team
+ * (C) 2003-2019 Anope Team
  * Contact us at team@anope.org
  *
  * Please read COPYING and README for further details.
@@ -123,14 +123,20 @@ class DBSQL : public Module, public Pipe
 					continue;
 
 				std::vector<Query> create = this->sql->CreateTable(this->prefix + s_type->GetName(), data);
-				for (unsigned i = 0; i < create.size(); ++i)
-					this->RunBackground(create[i]);
-
 				Query insert = this->sql->BuildInsert(this->prefix + s_type->GetName(), obj->id, data);
+
 				if (this->imported)
+				{
+					for (unsigned i = 0; i < create.size(); ++i)
+						this->RunBackground(create[i]);
+
 					this->RunBackground(insert, new ResultSQLSQLInterface(this, obj));
+				}
 				else
 				{
+					for (unsigned i = 0; i < create.size(); ++i)
+						this->sql->RunQuery(create[i]);
+
 					/* We are importing objects from another database module, so don't do asynchronous
 					 * queries in case the core has to shut down, it will cut short the import
 					 */
@@ -210,6 +216,8 @@ class DBSQL : public Module, public Pipe
 	{
 		if (this->shutting_down || obj->IsTSCached())
 			return;
+		if (obj->id == 0)
+			return; /* object is pending creation */
 		obj->UpdateTS();
 		this->updated_items.insert(obj);
 		this->Notify();
@@ -258,4 +266,3 @@ class DBSQL : public Module, public Pipe
 };
 
 MODULE_INIT(DBSQL)
-

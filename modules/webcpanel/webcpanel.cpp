@@ -1,5 +1,5 @@
 /*
- * (C) 2003-2016 Anope Team
+ * (C) 2003-2019 Anope Team
  * Contact us at team@anope.org
  *
  * Please read COPYING and README for further details.
@@ -15,6 +15,7 @@ class ModuleWebCPanel : public Module
 	ServiceReference<HTTPProvider> provider;
 	Panel panel;
 	PrimitiveExtensibleItem<Anope::string> id, ip;
+	PrimitiveExtensibleItem<time_t> last_login;
 
 	StaticFileServer style_css, logo_png, cubes_png, favicon_ico;
 
@@ -44,7 +45,8 @@ class ModuleWebCPanel : public Module
 
  public:
 	ModuleWebCPanel(const Anope::string &modname, const Anope::string &creator) : Module(modname, creator, EXTRA | VENDOR),
-		panel(this, "webcpanel"), id(this, "webcpanel_id"), ip(this, "webcpanel_ip"),
+		panel(this, "webcpanel"),
+		id(this, "webcpanel_id"), ip(this, "webcpanel_ip"), last_login(this, "webcpanel_last_login"),
 		style_css("style.css", "/static/style.css", "text/css"), logo_png("logo.png", "/static/logo.png", "image/png"), cubes_png("cubes.png", "/static/cubes.png", "image/png"), favicon_ico("favicon.ico", "/favicon.ico", "image/x-icon"),
 		index("/"), logout("/logout"), _register("/register"), confirm("/confirm"),
 		nickserv_info("NickServ", "/nickserv/info"), nickserv_cert("NickServ", "/nickserv/cert"), nickserv_access("NickServ", "/nickserv/access"), nickserv_alist("NickServ", "/nickserv/alist"),
@@ -221,7 +223,7 @@ class ModuleWebCPanel : public Module
 			provider->UnregisterPage(&this->chanserv_drop);
 
 			provider->UnregisterPage(&this->memoserv_memos);
-			
+
 			provider->UnregisterPage(&this->hostserv_request);
 
 			provider->UnregisterPage(&this->operserv_akill);
@@ -231,7 +233,7 @@ class ModuleWebCPanel : public Module
 
 namespace WebPanel
 {
-	void RunCommand(const Anope::string &user, NickCore *nc, const Anope::string &service, const Anope::string &c, std::vector<Anope::string> &params, TemplateFileServer::Replacements &r, const Anope::string &key)
+	void RunCommand(HTTPClient *client, const Anope::string &user, NickCore *nc, const Anope::string &service, const Anope::string &c, std::vector<Anope::string> &params, TemplateFileServer::Replacements &r, const Anope::string &key)
 	{
 		ServiceReference<Command> cmd("Command", c);
 		if (!cmd)
@@ -266,12 +268,15 @@ namespace WebPanel
 		my_reply(r, key);
 
 		CommandSource source(user, NULL, nc, &my_reply, bi);
+		source.ip = client->clientaddr.addr();
+
 		CommandInfo info;
 		info.name = c;
+
 		cmd->Run(source, "", info, params);
 	}
 
-	void RunCommandWithName(NickCore *nc, const Anope::string &service, const Anope::string &c, const Anope::string &cmdname, std::vector<Anope::string> &params, TemplateFileServer::Replacements &r, const Anope::string &key)
+	void RunCommandWithName(HTTPClient *client, NickCore *nc, const Anope::string &service, const Anope::string &c, const Anope::string &cmdname, std::vector<Anope::string> &params, TemplateFileServer::Replacements &r, const Anope::string &key)
 	{
 		ServiceReference<Command> cmd("Command", c);
 		if (!cmd)
@@ -303,6 +308,7 @@ namespace WebPanel
 		my_reply(r, key);
 
 		CommandSource source(nc->display, NULL, nc, &my_reply, bi);
+		source.ip = client->clientaddr.addr();
 
 		cmd->Run(source, cmdname, *info, params);
 	}

@@ -1,6 +1,6 @@
 /* ChanServ core functions
  *
- * (C) 2003-2016 Anope Team
+ * (C) 2003-2019 Anope Team
  * Contact us at team@anope.org
  *
  * Please read COPYING and README for further details.
@@ -13,6 +13,31 @@
 
 class CommandCSAKick : public Command
 {
+	void Enforce(CommandSource &source, ChannelInfo *ci)
+	{
+		Channel *c = ci->c;
+		int count = 0;
+
+		if (!c)
+		{
+			return;
+		}
+
+		for (Channel::ChanUserList::iterator it = c->users.begin(), it_end = c->users.end(); it != it_end; )
+		{
+			ChanUserContainer *uc = it->second;
+			++it;
+
+			if (c->CheckKick(uc->user))
+				++count;
+		}
+
+		bool override = !source.AccessFor(ci).HasPriv("AKICK");
+		Log(override ? LOG_OVERRIDE : LOG_COMMAND, source, this, ci) << "ENFORCE, affects " << count << " users";
+
+		source.Reply(_("AKICK ENFORCE for \002%s\002 complete; \002%d\002 users were affected."), ci->name.c_str(), count);
+	}
+
 	void DoAdd(CommandSource &source, ChannelInfo *ci, const std::vector<Anope::string> &params)
 	{
 		Anope::string mask = params[2];
@@ -58,7 +83,7 @@ class CommandCSAKick : public Command
 			}
 
 			Entry e("", mask);
-		
+
 			mask = (e.nick.empty() ? "*" : e.nick) + "!"
 				+ (e.user.empty() ? "*" : e.user) + "@"
 				+ (e.host.empty() ? "*" : e.host);
@@ -164,7 +189,7 @@ class CommandCSAKick : public Command
 
 		source.Reply(_("\002%s\002 added to %s autokick list."), mask.c_str(), ci->name.c_str());
 
-		this->DoEnforce(source, ci);
+		this->Enforce(source, ci);
 	}
 
 	void DoDel(CommandSource &source, ChannelInfo *ci, const std::vector<Anope::string> &params)
@@ -272,7 +297,7 @@ class CommandCSAKick : public Command
 				{
 					if (!number || number > ci->GetAkickCount())
 						return;
-	
+
 					const AutoKick *akick = ci->GetAkick(number - 1);
 
 					Anope::string timebuf, lastused;
@@ -347,7 +372,7 @@ class CommandCSAKick : public Command
 			list.Process(replies);
 
 			source.Reply(_("Autokick list for %s:"), ci->name.c_str());
-	
+
 			for (unsigned i = 0; i < replies.size(); ++i)
 				source.Reply(replies[i]);
 
@@ -384,7 +409,6 @@ class CommandCSAKick : public Command
 	void DoEnforce(CommandSource &source, ChannelInfo *ci)
 	{
 		Channel *c = ci->c;
-		int count = 0;
 
 		if (!c)
 		{
@@ -392,19 +416,7 @@ class CommandCSAKick : public Command
 			return;
 		}
 
-		for (Channel::ChanUserList::iterator it = c->users.begin(), it_end = c->users.end(); it != it_end; )
-		{
-			ChanUserContainer *uc = it->second;
-			++it;
-
-			if (c->CheckKick(uc->user))
-				++count;
-		}
-
-		bool override = !source.AccessFor(ci).HasPriv("AKICK");
-		Log(override ? LOG_OVERRIDE : LOG_COMMAND, source, this, ci) << "ENFORCE, affects " << count << " users";
-
-		source.Reply(_("AKICK ENFORCE for \002%s\002 complete; \002%d\002 users were affected."), ci->name.c_str(), count);
+		this->Enforce(source, ci);
 	}
 
 	void DoClear(CommandSource &source, ChannelInfo *ci)
@@ -442,7 +454,7 @@ class CommandCSAKick : public Command
 		}
 
 		bool is_list = cmd.equals_ci("LIST") || cmd.equals_ci("VIEW");
-		
+
 		bool has_access = false;
 		if (source.AccessFor(ci).HasPriv("AKICK") || source.HasPriv("chanserv/access/modify"))
 			has_access = true;

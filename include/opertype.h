@@ -1,7 +1,7 @@
 /*
  *
  * (C) 2008-2011 Robin Burchell <w00t@inspircd.org>
- * (C) 2008-2016 Anope Team <team@anope.org>
+ * (C) 2008-2019 Anope Team <team@anope.org>
  *
  * Please read COPYING and README for further details.
  */
@@ -33,7 +33,7 @@ struct CoreExport Oper
 	virtual ~Oper();
 
 	static std::vector<Oper *> opers;
-	
+
 	/** Find an oper block by name
 	 * @param name The name
 	 * @return the oper block

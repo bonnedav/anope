@@ -1,5 +1,5 @@
 /*
- * (C) 2003-2016 Anope Team
+ * (C) 2003-2019 Anope Team
  * Contact us at team@anope.org
  *
  * Please read COPYING and README for further details.
@@ -53,7 +53,7 @@ bool WebCPanel::ChanServ::Akick::OnRequest(HTTPProvider *server, const Anope::st
 		params.push_back("DEL");
 		params.push_back(message.get_data["mask"]);
 
-		WebPanel::RunCommand(na->nc->display, na->nc, "ChanServ", "chanserv/akick", params, replacements);
+		WebPanel::RunCommand(client, na->nc->display, na->nc, "ChanServ", "chanserv/akick", params, replacements);
 	}
 	else if (message.post_data["mask"].empty() == false)
 	{
@@ -64,7 +64,7 @@ bool WebCPanel::ChanServ::Akick::OnRequest(HTTPProvider *server, const Anope::st
 		if (message.post_data["reason"].empty() == false)
 			params.push_back(message.post_data["reason"]);
 
-		WebPanel::RunCommand(na->nc->display, na->nc, "ChanServ", "chanserv/akick", params, replacements);
+		WebPanel::RunCommand(client, na->nc->display, na->nc, "ChanServ", "chanserv/akick", params, replacements);
 	}
 
 	replacements["ESCAPED_CHANNEL"] = HTTPUtils::URLEncode(chname);
@@ -74,11 +74,11 @@ bool WebCPanel::ChanServ::Akick::OnRequest(HTTPProvider *server, const Anope::st
 		AutoKick *akick = ci->GetAkick(i);
 
 		if (akick->nc)
-			replacements["MASKS"] = HTTPUtils::Escape(akick->nc->display);
+			replacements["MASKS"] = akick->nc->display;
 		else
-			replacements["MASKS"] = HTTPUtils::Escape(akick->mask);
-		replacements["CREATORS"] = HTTPUtils::Escape(akick->creator);
-		replacements["REASONS"] = HTTPUtils::Escape(akick->reason);
+			replacements["MASKS"] = akick->mask;
+		replacements["CREATORS"] = akick->creator;
+		replacements["REASONS"] = akick->reason;
 	}
 
 	Page.Serve(server, page_name, client, message, reply, replacements);
@@ -91,4 +91,3 @@ std::set<Anope::string> WebCPanel::ChanServ::Akick::GetData()
 	v.insert("channel");
 	return v;
 }
-

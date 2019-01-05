@@ -1,6 +1,6 @@
 /* Configuration file handling.
  *
- * (C) 2003-2016 Anope Team
+ * (C) 2003-2019 Anope Team
  * Contact us at team@anope.org
  *
  * Please read COPYING and README for further details.
@@ -35,7 +35,7 @@ int Block::CountBlock(const Anope::string &bname)
 {
 	if (!this)
 		return 0;
-	
+
 	return blocks.count(bname);
 }
 
@@ -43,7 +43,7 @@ Block* Block::GetBlock(const Anope::string &bname, int num)
 {
 	if (!this)
 		return NULL;
-	
+
 	std::pair<block_map::iterator, block_map::iterator> it = blocks.equal_range(bname);
 
 	for (int i = 0; it.first != it.second; ++it.first, ++i)
@@ -157,7 +157,13 @@ Conf::Conf() : Block("")
 	Block *serverinfo = this->GetBlock("serverinfo"), *options = this->GetBlock("options"),
 		*mail = this->GetBlock("mail"), *networkinfo = this->GetBlock("networkinfo");
 
-	ValidateNotEmpty("serverinfo", "name", serverinfo->Get<const Anope::string>("name"));
+	const Anope::string &servername = serverinfo->Get<Anope::string>("name");
+
+	ValidateNotEmpty("serverinfo", "name", servername);
+
+	if (servername.find(' ') != Anope::string::npos || servername.find('.') == Anope::string::npos)
+		throw ConfigException("serverinfo:name is not a valid server name");
+
 	ValidateNotEmpty("serverinfo", "description", serverinfo->Get<const Anope::string>("description"));
 	ValidateNotEmpty("serverinfo", "pid", serverinfo->Get<const Anope::string>("pid"));
 	ValidateNotEmpty("serverinfo", "motd", serverinfo->Get<const Anope::string>("motd"));
@@ -204,6 +210,9 @@ Conf::Conf() : Block("")
 		ValidateNotEmpty("uplink", "host", host);
 		ValidateNotZero("uplink", "port", port);
 		ValidateNotEmpty("uplink", "password", password);
+
+		if (password.find(' ') != Anope::string::npos || password[0] == ':')
+			throw ConfigException("uplink:password is not valid");
 
 		this->Uplinks.push_back(Uplink(host, port, password, ipv6));
 	}
@@ -278,7 +287,7 @@ Conf::Conf() : Block("")
 
 		ValidateNotEmpty("oper", "name", nname);
 		ValidateNotEmpty("oper", "type", type);
-		
+
 		OperType *ot = NULL;
 		for (unsigned j = 0; j < this->MyOperTypes.size(); ++j)
 			if (this->MyOperTypes[j]->GetName() == type)
@@ -588,7 +597,7 @@ Block *Conf::GetModule(Module *m)
 {
 	if (!m)
 		return NULL;
-	
+
 	return GetModule(m->name);
 }
 
@@ -599,7 +608,7 @@ Block *Conf::GetModule(const Anope::string &mname)
 		return it->second;
 
 	Block* &block = modules[mname];
-	
+
 	/* Search for the block */
 	for (std::pair<block_map::iterator, block_map::iterator> iters = blocks.equal_range("module"); iters.first != iters.second; ++iters.first)
 	{
@@ -656,6 +665,11 @@ const Anope::string &File::GetName() const
 	return this->name;
 }
 
+Anope::string File::GetPath() const
+{
+	return (this->executable ? "" : Anope::ConfigDir + "/") + this->name;
+}
+
 bool File::IsOpen() const
 {
 	return this->fp != NULL;
@@ -709,21 +723,24 @@ Anope::string File::Read()
 
 void Conf::LoadConf(File &file)
 {
+	if (file.GetName().empty())
+		return;
+
 	if (!file.Open())
-		throw ConfigException("File " + file.GetName() + " could not be opened.");
+		throw ConfigException("File " + file.GetPath() + " could not be opened.");
 
 	Anope::string itemname, wordbuffer;
 	std::stack<Block *> block_stack;
 	int linenumber = 0;
 	bool in_word = false, in_quote = false, in_comment = false;
 
-	Log(LOG_DEBUG) << "Start to read conf " << file.GetName();
+	Log(LOG_DEBUG) << "Start to read conf " << file.GetPath();
 	// Start reading characters...
 	while (!file.End())
-	{	
+	{
 		Anope::string line = file.Read();
 		++linenumber;
-		
+
 		/* If this line is completely empty and we are in a quote, just append a newline */
 		if (line.empty() && in_quote)
 			wordbuffer += "\n";
@@ -922,4 +939,3 @@ void Conf::LoadConf(File &file)
 	if (!block_stack.empty())
 		throw ConfigException("Unterminated block at end of file: " + file.GetName() + ". Block was opened on line " + stringify(block_stack.top()->linenum));
 }
-

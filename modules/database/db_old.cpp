@@ -1,6 +1,6 @@
 /*
  *
- * (C) 2003-2016 Anope Team
+ * (C) 2003-2019 Anope Team
  * Contact us at team@anope.org
  *
  * Please read COPYING and README for further details.
@@ -522,40 +522,40 @@ static void LoadNicks()
 			switch (u16)
 			{
 				case LANG_ES:
-					nc->language = "es_ES";
+					nc->language = "es_ES.UTF-8";
 					break;
 				case LANG_PT:
-					nc->language = "pt_PT";
+					nc->language = "pt_PT.UTF-8";
 					break;
 				case LANG_FR:
-					nc->language = "fr_FR";
+					nc->language = "fr_FR.UTF-8";
 					break;
 				case LANG_TR:
-					nc->language = "tr_TR";
+					nc->language = "tr_TR.UTF-8";
 					break;
 				case LANG_IT:
-					nc->language = "it_IT";
+					nc->language = "it_IT.UTF-8";
 					break;
 				case LANG_DE:
-					nc->language = "de_DE";
+					nc->language = "de_DE.UTF-8";
 					break;
 				case LANG_CAT:
-					nc->language = "ca_ES"; // yes, iso639 defines catalan as CA
+					nc->language = "ca_ES.UTF-8"; // yes, iso639 defines catalan as CA
 					break;
 				case LANG_GR:
-					nc->language = "el_GR";
+					nc->language = "el_GR.UTF-8";
 					break;
 				case LANG_NL:
-					nc->language = "nl_NL";
+					nc->language = "nl_NL.UTF-8";
 					break;
 				case LANG_RU:
-					nc->language = "ru_RU";
+					nc->language = "ru_RU.UTF-8";
 					break;
 				case LANG_HUN:
-					nc->language = "hu_HU";
+					nc->language = "hu_HU.UTF-8";
 					break;
 				case LANG_PL:
-					nc->language = "pl_PL";
+					nc->language = "pl_PL.UTF-8";
 					break;
 				case LANG_EN_US:
 				case LANG_JA_JIS:
@@ -689,7 +689,7 @@ static void LoadVHosts()
 		NickAlias *na = NickAlias::Find(nick);
 		if (na == NULL)
 		{
-			Log() << "Removing vhost for non-existent nick " << nick;
+			Log() << "Removing vhost for nonexistent nick " << nick;
 			continue;
 		}
 
@@ -858,7 +858,7 @@ static void LoadChannels()
 				if (in_use)
 				{
 					ChanAccess *access = NULL;
-					
+
 					if (xop)
 					{
 						if (provider_xop)
@@ -1214,7 +1214,7 @@ static void LoadExceptions()
 	dbFILE *f = open_db_read("OperServ", "exception.db", 9);
 	if (f == NULL)
 		return;
-	
+
 	int16_t num;
 	READ(read_int16(&num, f));
 	for (int i = 0; i < num; ++i)
@@ -1358,4 +1358,3 @@ class DBOld : public Module
 };
 
 MODULE_INIT(DBOld)
-

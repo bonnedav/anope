@@ -1,6 +1,6 @@
 /* NickServ core functions
  *
- * (C) 2003-2016 Anope Team
+ * (C) 2003-2019 Anope Team
  * Contact us at team@anope.org
  *
  * Please read COPYING and README for further details.
@@ -27,7 +27,7 @@ class CommandNSConfirm : public Command
 	{
 		const Anope::string &passcode = params[0];
 
-		if (source.nc && !source.nc->HasExt("UNCONFIRMED") && source.HasPriv("nickserv/confirm"))
+		if (source.nc && (!source.nc->HasExt("UNCONFIRMED") || source.IsOper()) && source.HasPriv("nickserv/confirm"))
 		{
 			NickAlias *na = NickAlias::Find(passcode);
 			if (na == NULL)
@@ -234,7 +234,6 @@ class CommandNSRegister : public Command
 			if (nsregister.equals_ci("admin"))
 			{
 				nc->Extend<bool>("UNCONFIRMED");
-				// User::Identify() called below will notify the user that their registration is pending
 			}
 			else if (nsregister.equals_ci("mail"))
 			{
@@ -249,8 +248,16 @@ class CommandNSRegister : public Command
 
 			if (u)
 			{
+				// This notifies the user that if their registration is unconfirmed
 				u->Identify(na);
 				u->lastnickreg = Anope::CurTime;
+			}
+			else if (nc->HasExt("UNCONFIRMED"))
+			{
+				if (nsregister.equals_ci("admin"))
+					source.Reply(_("All new accounts must be validated by an administrator. Please wait for your registration to be confirmed."));
+				else if (nsregister.equals_ci("mail"))
+					source.Reply(_("Your email address is not confirmed. To confirm it, follow the instructions that were emailed to you."));
 			}
 		}
 	}

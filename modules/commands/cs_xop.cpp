@@ -1,6 +1,6 @@
 /* ChanServ core functions
  *
- * (C) 2003-2016 Anope Team
+ * (C) 2003-2019 Anope Team
  * Contact us at team@anope.org
  *
  * Please read COPYING and README for further details.
@@ -349,7 +349,7 @@ class CommandCSXOP : public Command
 					return;
 				}
 			}
-			
+
 			source.Reply(_("\002%s\002 not found on %s %s list."), mask.c_str(), ci->name.c_str(), source.command.c_str());
 		}
 	}
@@ -466,7 +466,7 @@ class CommandCSXOP : public Command
 
 			if (access->provider->name != "access/xop" || source.command.upper() != access->AccessSerialize())
 				continue;
-	
+
 			delete ci->EraseAccess(i - 1);
 		}
 
@@ -561,7 +561,7 @@ class CommandCSXOP : public Command
 		BotInfo *access_bi, *flags_bi;
 		Anope::string access_cmd, flags_cmd;
 		Command::FindCommandFromService("chanserv/access", access_bi, access_cmd);
-		Command::FindCommandFromService("chanserv/flags", flags_bi, access_cmd);
+		Command::FindCommandFromService("chanserv/flags", flags_bi, flags_cmd);
 		if (!access_cmd.empty() || !flags_cmd.empty())
 		{
 			source.Reply(_("Alternative methods of modifying channel access lists are\n"

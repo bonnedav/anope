@@ -1,7 +1,7 @@
 /*
  *
  * (C) 2008-2011 Robin Burchell <w00t@inspircd.org>
- * (C) 2008-2016 Anope Team <team@anope.org>
+ * (C) 2008-2019 Anope Team <team@anope.org>
  *
  * Please read COPYING and README for further details.
  */
@@ -309,7 +309,6 @@ bool Command::FindCommandFromService(const Anope::string &command_service, BotIn
 			return true;
 		}
 	}
-	
+
 	return false;
 }
-

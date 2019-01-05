@@ -1,6 +1,6 @@
 /* NickServ core functions
  *
- * (C) 2003-2016 Anope Team
+ * (C) 2003-2019 Anope Team
  * Contact us at team@anope.org
  *
  * Please read COPYING and README for further details.
@@ -81,7 +81,7 @@ class CommandNSAList : public Command
 			AccessGroup access = ci->AccessFor(nc, false);
 			if (access.empty())
 				continue;
-				
+
 			++chan_count;
 
 			entry["Number"] = stringify(chan_count);

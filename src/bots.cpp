@@ -1,7 +1,7 @@
 /*
  *
  * (C) 2008-2011 Robin Burchell <w00t@inspircd.org>
- * (C) 2008-2016 Anope Team <team@anope.org>
+ * (C) 2008-2019 Anope Team <team@anope.org>
  *
  * Please read COPYING and README for further details.
  */
@@ -29,7 +29,7 @@ BotInfo::BotInfo(const Anope::string &nnick, const Anope::string &nuser, const A
 	(*BotListByNick)[this->nick] = this;
 	if (!this->uid.empty())
 		(*BotListByUID)[this->uid] = this;
-	
+
 	FOREACH_MOD(OnCreateBot, (this));
 
 	// If we're synchronised with the uplink already, send the bot.
@@ -160,7 +160,7 @@ void BotInfo::Assign(User *u, ChannelInfo *ci)
 
 	if (ci->bi)
 		ci->bi->UnAssign(u, ci);
-	
+
 	ci->bi = this;
 	this->channels->insert(ci);
 
@@ -275,4 +275,3 @@ BotInfo* BotInfo::Find(const Anope::string &nick, bool nick_only)
 
 	return NULL;
 }
-

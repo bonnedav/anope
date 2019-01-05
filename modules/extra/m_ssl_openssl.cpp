@@ -1,6 +1,6 @@
 /*
  *
- * (C) 2010-2016 Anope Team
+ * (C) 2010-2019 Anope Team
  * Contact us at team@anope.org
  *
  * Please read COPYING and README for further details.
@@ -147,7 +147,7 @@ class SSLModule : public Module
 
 		if (Anope::IsFile(this->certfile.c_str()))
 		{
-			if (!SSL_CTX_use_certificate_file(client_ctx, this->certfile.c_str(), SSL_FILETYPE_PEM) || !SSL_CTX_use_certificate_file(server_ctx, this->certfile.c_str(), SSL_FILETYPE_PEM))
+			if (!SSL_CTX_use_certificate_chain_file(client_ctx, this->certfile.c_str()) || !SSL_CTX_use_certificate_chain_file(server_ctx, this->certfile.c_str()))
 				throw ConfigException("Error loading certificate");
 			else
 				Log(LOG_DEBUG) << "m_ssl_openssl: Successfully loaded certificate " << this->certfile;
@@ -205,7 +205,7 @@ void MySSLService::Init(Socket *s)
 {
 	if (s->io != &NormalSocketIO)
 		throw CoreException("Socket initializing SSL twice");
-	
+
 	s->io = new SSLSocketIO();
 }
 
@@ -283,7 +283,7 @@ ClientSocket *SSLSocketIO::Accept(ListenSocket *s)
 
 	newsocket->flags[SF_ACCEPTING] = true;
 	this->FinishAccept(newsocket);
-	
+
 	return newsocket;
 }
 
@@ -297,7 +297,7 @@ SocketFlag SSLSocketIO::FinishAccept(ClientSocket *cs)
 		throw SocketException("SSLSocketIO::FinishAccept called for a socket not accepted nor accepting?");
 
 	SSLSocketIO *io = anope_dynamic_static_cast<SSLSocketIO *>(cs->io);
-	
+
 	int ret = SSL_accept(io->sslsock);
 	if (ret <= 0)
 	{
@@ -378,7 +378,7 @@ SocketFlag SSLSocketIO::FinishConnect(ConnectionSocket *s)
 		if (!SSL_set_fd(io->sslsock, s->GetFD()))
 			throw SocketException("Unable to set SSL fd");
 	}
-	
+
 	int ret = SSL_connect(io->sslsock);
 	if (ret <= 0)
 	{

@@ -1,6 +1,6 @@
 /* OperServ core functions
  *
- * (C) 2003-2016 Anope Team
+ * (C) 2003-2019 Anope Team
  * Contact us at team@anope.org
  *
  * Please read COPYING and README for further details.
@@ -105,6 +105,18 @@ class MyForbidService : public ForbidService
 		return NULL;
 	}
 
+	ForbidData *FindForbidExact(const Anope::string &mask, ForbidType ftype) anope_override
+	{
+		for (unsigned i = this->forbids(ftype).size(); i > 0; --i)
+		{
+			ForbidData *d = this->forbids(ftype)[i - 1];
+
+			if (d->mask.equals_ci(mask))
+				return d;
+		}
+		return NULL;
+	}
+
 	std::vector<ForbidData *> GetForbids() anope_override
 	{
 		std::vector<ForbidData *> f;
@@ -187,7 +199,7 @@ class CommandOSForbid : public Command
 			if (!expiry.empty())
 			{
 				expiryt = Anope::DoTime(expiry);
-				if (expiryt == -1)
+				if (expiryt < 0)
 				{
 					source.Reply(BAD_EXPIRY_TIME);
 					return;
@@ -203,7 +215,7 @@ class CommandOSForbid : public Command
 				return;
 			}
 
-			ForbidData *d = this->fs->FindForbid(entry, ftype);
+			ForbidData *d = this->fs->FindForbidExact(entry, ftype);
 			bool created = false;
 			if (d == NULL)
 			{
@@ -322,7 +334,7 @@ class CommandOSForbid : public Command
 		{
 			const Anope::string &entry = params[2];
 
-			ForbidData *d = this->fs->FindForbid(entry, ftype);
+			ForbidData *d = this->fs->FindForbidExact(entry, ftype);
 			if (d != NULL)
 			{
 				if (Anope::ReadOnly)

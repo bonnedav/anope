@@ -1,6 +1,6 @@
 /*
  *
- * (C) 2010-2016 Anope Team
+ * (C) 2010-2019 Anope Team
  * Contact us at team@anope.org
  *
  * Please read COPYING and README for further details.
@@ -108,7 +108,8 @@ class MyXMLRPCEvent : public XMLRPCEvent
 				}
 				reply(out);
 
-				CommandSource source(user, NULL, na ? *na->nc : NULL, &reply, bi);
+				User *u = User::Find(user, true);
+				CommandSource source(user, u, na ? *na->nc : NULL, &reply, bi);
 				Command::Run(source, command);
 
 				if (!out.empty())
@@ -131,7 +132,7 @@ class MyXMLRPCEvent : public XMLRPCEvent
 			req->Dispatch();
 			return false;
 		}
-		
+
 		return true;
 	}
 
@@ -303,4 +304,3 @@ class ModuleXMLRPCMain : public Module
 };
 
 MODULE_INIT(ModuleXMLRPCMain)
-

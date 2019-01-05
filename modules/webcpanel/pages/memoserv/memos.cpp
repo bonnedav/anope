@@ -1,5 +1,5 @@
 /*
- * (C) 2003-2016 Anope Team
+ * (C) 2003-2019 Anope Team
  * Contact us at team@anope.org
  *
  * Please read COPYING and README for further details.
@@ -57,7 +57,7 @@ bool WebCPanel::MemoServ::Memos::OnRequest(HTTPProvider *server, const Anope::st
 		params.push_back(HTTPUtils::URLDecode(message.post_data["receiver"]));
 		params.push_back(HTTPUtils::URLDecode(message.post_data["message"]));
 
-		WebPanel::RunCommand(na->nc->display, na->nc, "MemoServ", "memoserv/send", params, replacements, "CMDR");
+		WebPanel::RunCommand(client, na->nc->display, na->nc, "MemoServ", "memoserv/send", params, replacements, "CMDR");
 	}
 	if (message.get_data.count("del") > 0 && message.get_data.count("number") > 0)
 	{
@@ -66,7 +66,7 @@ bool WebCPanel::MemoServ::Memos::OnRequest(HTTPProvider *server, const Anope::st
 			params.push_back(chname);
 		params.push_back(message.get_data["number"]);
 
-		WebPanel::RunCommand(na->nc->display, na->nc, "MemoServ", "memoserv/del", params, replacements, "CMDR");
+		WebPanel::RunCommand(client, na->nc->display, na->nc, "MemoServ", "memoserv/del", params, replacements, "CMDR");
 	}
 	if (message.get_data.count("read") > 0 && message.get_data.count("number") > 0)
 	{
@@ -101,7 +101,7 @@ bool WebCPanel::MemoServ::Memos::OnRequest(HTTPProvider *server, const Anope::st
 		replacements["NUMBER"] = stringify(i+1);
 		replacements["SENDER"] = m->sender;
 		replacements["TIME"] = Anope::strftime(m->time);
-		replacements["TEXT"] = HTTPUtils::Escape(m->text);
+		replacements["TEXT"] = m->text;
 		if (m->unread)
 			replacements["UNREAD"] = "YES";
 		else
@@ -112,4 +112,3 @@ bool WebCPanel::MemoServ::Memos::OnRequest(HTTPProvider *server, const Anope::st
 	page.Serve(server, page_name, client, message, reply, replacements);
 	return true;
 }
-

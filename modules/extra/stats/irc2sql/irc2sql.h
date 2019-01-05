@@ -1,3 +1,11 @@
+/*
+ *
+ * (C) 2013-2019 Anope Team
+ * Contact us at team@anope.org
+ *
+ * Please read COPYING and README for further details.
+ */
+
 #include "module.h"
 #include "modules/sql.h"
 
@@ -74,5 +82,3 @@ class IRC2SQL : public Module
 
 	void OnBotNotice(User *u, BotInfo *bi, Anope::string &message) anope_override;
 };
-
-

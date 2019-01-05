@@ -1,6 +1,6 @@
 /* Unreal IRCD 4 functions
  *
- * (C) 2003-2016 Anope Team
+ * (C) 2003-2019 Anope Team
  * Contact us at team@anope.org
  *
  * Please read COPYING and README for further details.
@@ -158,7 +158,8 @@ class UnrealIRCdProto : public IRCDProto
 	/* JOIN */
 	void SendJoin(User *user, Channel *c, const ChannelStatus *status) anope_override
 	{
-		UplinkSocket::Message(Me) << "SJOIN " << c->creation_time << " " << c->name << " :" << user->GetUID();
+		UplinkSocket::Message(Me) << "SJOIN " << c->creation_time << " " << c->name
+			<< " +" << c->GetModes(true, true) << " :" << user->GetUID();
 		if (status)
 		{
 			/* First save the channel status incase uc->Status == status */
@@ -204,6 +205,10 @@ class UnrealIRCdProto : public IRCDProto
 			UplinkSocket::Message(Me) << "CHGIDENT " << u->GetUID() << " " << vIdent;
 		if (!vhost.empty())
 			UplinkSocket::Message(Me) << "CHGHOST " << u->GetUID() << " " << vhost;
+		// Internally unreal sets +xt on chghost
+		BotInfo *bi = Config->GetClient("HostServ");
+		u->SetMode(bi, "CLOAK");
+		u->SetMode(bi, "VHOST");
 	}
 
 	void SendConnect() anope_override
@@ -225,6 +230,15 @@ class UnrealIRCdProto : public IRCDProto
 		UplinkSocket::Message() << "PROTOCTL " << "EAUTH=" << Me->GetName() << ",,,Anope-" << Anope::VersionShort();
 		UplinkSocket::Message() << "PROTOCTL " << "SID=" << Me->GetSID();
 		SendServer(Me);
+	}
+
+	void SendSASLMechanisms(std::vector<Anope::string> &mechanisms) anope_override
+	{
+		Anope::string mechlist;
+		for (unsigned i = 0; i < mechanisms.size(); ++i)
+			mechlist += "," + mechanisms[i];
+
+		UplinkSocket::Message() << "MD client " << Me->GetName() << " saslmechlist :" << (mechanisms.empty() ? "" : mechlist.substr(1));
 	}
 
 	/* SVSHOLD - set */
@@ -300,9 +314,14 @@ class UnrealIRCdProto : public IRCDProto
 			UplinkSocket::Message() << "SVSPART " << user->GetUID() << " " << chan;
 	}
 
+	void SendGlobopsInternal(const MessageSource &source, const Anope::string &buf) anope_override
+	{
+		UplinkSocket::Message(Me) << "SENDUMODE o :from " << source.GetName() << ": " << buf;
+	}
+
 	void SendSWhois(const MessageSource &source, const Anope::string &who, const Anope::string &mask) anope_override
 	{
-		UplinkSocket::Message(source) << "SWHOIS " << who << " :" << mask;
+		UplinkSocket::Message() << "SWHOIS " << who << " :" << mask;
 	}
 
 	void SendEOB() anope_override
@@ -347,22 +366,8 @@ class UnrealIRCdProto : public IRCDProto
 
 	void SendChannel(Channel *c) anope_override
 	{
-		/* Unreal does not support updating a channels TS without actually joining a user,
-		 * so we will join and part us now
-		 */
-		BotInfo *bi = c->ci->WhoSends();
-		if (!bi)
-			;
-		else if (c->FindUser(bi) == NULL)
-		{
-			bi->Join(c);
-			bi->Part(c);
-		}
-		else
-		{
-			bi->Part(c);
-			bi->Join(c);
-		}
+		UplinkSocket::Message(Me) << "SJOIN " << c->creation_time << " " << c->name
+			<< " +" << c->GetModes(true, true) << " :";
 	}
 
 	void SendSASLMessage(const SASL::Message &message) anope_override
@@ -562,7 +567,7 @@ class ChannelModeFlood : public ChannelModeParam
 				return true;
 		}
 		catch (const ConvertException &) { }
-	
+
 		/* '['<number><1 letter>[optional: '#'+1 letter],[next..]']'':'<number> */
 		size_t end_bracket = value.find(']', 1);
 		if (end_bracket == Anope::string::npos)
@@ -945,10 +950,10 @@ struct IRCDMessageNick : IRCDMessage
 			Server *s = Server::Find(params[5]);
 			if (s == NULL)
 			{
-				Log(LOG_DEBUG) << "User " << params[0] << " introduced from non-existent server " << params[5] << "?";
+				Log(LOG_DEBUG) << "User " << params[0] << " introduced from nonexistent server " << params[5] << "?";
 				return;
 			}
-		
+
 			NickAlias *na = NULL;
 
 			if (params[6] == "0")
@@ -1001,7 +1006,7 @@ struct IRCDMessageSASL : IRCDMessage
 	void Run(MessageSource &source, const std::vector<Anope::string> &params) anope_override
 	{
 		size_t p = params[1].find('!');
-		if (!SASL::sasl || p == Anope::string::npos)	
+		if (!SASL::sasl || p == Anope::string::npos)
 			return;
 
 		SASL::Message m;
@@ -1151,14 +1156,14 @@ struct IRCDMessageSJoin : IRCDMessage
 				sju.second = User::Find(buf);
 				if (!sju.second)
 				{
-					Log(LOG_DEBUG) << "SJOIN for non-existent user " << buf << " on " << params[1];
+					Log(LOG_DEBUG) << "SJOIN for nonexistent user " << buf << " on " << params[1];
 					continue;
 				}
 
 				users.push_back(sju);
 			}
 		}
-		
+
 		time_t ts = Anope::string(params[0]).is_pos_number_only() ? convertTo<time_t>(params[0]) : Anope::CurTime;
 		Message::Join::SJoin(source, params[1], ts, modes, users);
 

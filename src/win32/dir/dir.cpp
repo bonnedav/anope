@@ -1,6 +1,6 @@
 /* POSIX emulation layer for Windows.
  *
- * (C) 2008-2016 Anope Team
+ * (C) 2008-2019 Anope Team
  * Contact us at team@anope.org
  *
  * Please read COPYING and README for further details.
@@ -8,7 +8,7 @@
 
 #include "dir.h"
 #include <stdio.h>
- 
+
 DIR *opendir(const char *path)
 {
 	char real_path[MAX_PATH];

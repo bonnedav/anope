@@ -1,6 +1,6 @@
 /* ChanServ core functions
  *
- * (C) 2003-2016 Anope Team
+ * (C) 2003-2019 Anope Team
  * Contact us at team@anope.org
  *
  * Please read COPYING and README for further details.
@@ -43,6 +43,9 @@ class CommandCSSet : public Command
 			const CommandInfo &info = it->second;
 			if (c_name.find_ci(this_name + " ") == 0)
 			{
+				if (info.hide)
+					continue;
+
 				ServiceReference<Command> c("Command", info.name);
 
 				// XXX dup
@@ -504,20 +507,6 @@ class CommandCSSetPersist : public Command
 			{
 				ci->Extend<bool>("PERSIST");
 
-				/* Channel doesn't exist, create it */
-				if (!ci->c)
-				{
-					bool created;
-					Channel *c = Channel::FindOrCreate(ci->name, created);
-					if (ci->bi)
-					{
-						ChannelStatus status(BotModes());
-						ci->bi->Join(c, &status);
-					}
-					if (created)
-						c->Sync();
-				}
-
 				/* Set the perm mode */
 				if (cm)
 				{
@@ -541,7 +530,7 @@ class CommandCSSetPersist : public Command
 					}
 
 					ChanServ->Assign(NULL, ci);
-					if (!ci->c->FindUser(ChanServ))
+					if (ci->c && !ci->c->FindUser(ChanServ))
 					{
 						ChannelStatus status(BotModes());
 						ChanServ->Join(ci->c, &status);
@@ -1099,7 +1088,8 @@ class CommandCSSetNoexpire : public Command
 class CSSet : public Module
 {
 	SerializableExtensibleItem<bool> noautoop, peace, securefounder,
-		restricted, secure, secureops, signkick, signkick_level, noexpire;
+		restricted, secure, secureops, signkick, signkick_level, noexpire,
+		persist;
 
 	struct KeepModes : SerializableExtensibleItem<bool>
 	{
@@ -1147,51 +1137,6 @@ class CSSet : public Module
 		}
 	} keep_modes;
 
-	struct Persist : SerializableExtensibleItem<bool>
-	{
-		Persist(Module *m, const Anope::string &n) : SerializableExtensibleItem<bool>(m, n) { }
-
-		void ExtensibleUnserialize(Extensible *e, Serializable *s, Serialize::Data &data) anope_override
-		{
-			SerializableExtensibleItem<bool>::ExtensibleUnserialize(e, s, data);
-
-			if (s->GetSerializableType()->GetName() != "ChannelInfo" || !this->HasExt(e))
-				return;
-
-			ChannelInfo *ci = anope_dynamic_static_cast<ChannelInfo *>(s);
-			if (ci->c)
-				return;
-
-			bool created;
-			Channel *c = Channel::FindOrCreate(ci->name, created);
-
-			ChannelMode *cm = ModeManager::FindChannelModeByName("PERM");
-			if (cm)
-			{
-				c->SetMode(NULL, cm);
-			}
-			/* on startup we might not know mode availibity here */
-			else if (Me && Me->IsSynced())
-			{
-				if (!ci->bi)
-				{
-					BotInfo *ChanServ = Config->GetClient("ChanServ");
-					if (ChanServ)
-						ChanServ->Assign(NULL, ci);
-				}
-
-				if (ci->bi && !c->FindUser(ci->bi))
-				{
-					ChannelStatus status(BotModes());
-					ci->bi->Join(c, &status);
-				}
-			}
-
-			if (created)
-				c->Sync();
-		}
-	} persist;
-
 	CommandCSSet commandcsset;
 	CommandCSSetAutoOp commandcssetautoop;
 	CommandCSSetBanType commandcssetbantype;
@@ -1218,7 +1163,8 @@ class CSSet : public Module
 		securefounder(this, "SECUREFOUNDER"), restricted(this, "RESTRICTED"),
 		secure(this, "CS_SECURE"), secureops(this, "SECUREOPS"), signkick(this, "SIGNKICK"),
 		signkick_level(this, "SIGNKICK_LEVEL"), noexpire(this, "CS_NO_EXPIRE"),
-		keep_modes(this, "CS_KEEP_MODES"), persist(this, "PERSIST"),
+		persist(this, "PERSIST"),
+		keep_modes(this, "CS_KEEP_MODES"),
 
 		commandcsset(this), commandcssetautoop(this), commandcssetbantype(this),
 		commandcssetdescription(this), commandcssetfounder(this), commandcssetkeepmodes(this),
@@ -1299,7 +1245,7 @@ class CSSet : public Module
 
 	void OnJoinChannel(User *u, Channel *c) anope_override
 	{
-		if (persist_lower_ts && c->ci && persist.HasExt(c->ci) && c->creation_time > c->ci->time_registered)
+		if (u->server != Me && persist_lower_ts && c->ci && persist.HasExt(c->ci) && c->creation_time > c->ci->time_registered)
 		{
 			Log(LOG_DEBUG) << "Changing TS of " << c->name << " from " << c->creation_time << " to " << c->ci->time_registered;
 			c->creation_time = c->ci->time_registered;
@@ -1312,9 +1258,9 @@ class CSSet : public Module
 	{
 		if (chan->ci)
 		{
-			if (noautoop.HasExt(chan->ci))	
+			if (noautoop.HasExt(chan->ci))
 				give_modes = false;
-			if (secureops.HasExt(chan->ci))
+			if (secureops.HasExt(chan->ci) && !user->HasPriv("chanserv/administration"))
 				// This overrides what chanserv does because it is loaded after chanserv
 				take_modes = true;
 		}

@@ -1,5 +1,5 @@
 /*
- * (C) 2003-2016 Anope Team
+ * (C) 2003-2019 Anope Team
  * Contact us at team@anope.org
  *
  * Please read COPYING and README for further details.
@@ -82,7 +82,7 @@ bool WebCPanel::ChanServ::Modes::OnRequest(HTTPProvider *server, const Anope::st
 			params.push_back("SET");
 			params.push_back("-" + Anope::string(cm->mchar));
 			params.push_back(message.get_data["mask"]);
-			WebPanel::RunCommand(na->nc->display, na->nc, "ChanServ", "chanserv/mode", params, replacements);
+			WebPanel::RunCommand(client, na->nc->display, na->nc, "ChanServ", "chanserv/mode", params, replacements);
 		}
 		else if (message.post_data["mask"].empty() == false)
 		{
@@ -91,12 +91,12 @@ bool WebCPanel::ChanServ::Modes::OnRequest(HTTPProvider *server, const Anope::st
 			params.push_back("SET");
 			params.push_back("+" + Anope::string(cm->mchar));
 			params.push_back(message.post_data["mask"]);
-			WebPanel::RunCommand(na->nc->display, na->nc, "ChanServ", "chanserv/mode", params, replacements);
+			WebPanel::RunCommand(client, na->nc->display, na->nc, "ChanServ", "chanserv/mode", params, replacements);
 		}
 
 		std::vector<Anope::string> v = c->GetModeList(cm->name);
 		for (unsigned int i = 0; i < v.size(); ++i)
-			replacements["MASKS"] = HTTPUtils::Escape(v[i]);
+			replacements["MASKS"] = v[i];
 	}
 
 	Page.Serve(server, page_name, client, message, reply, replacements);
@@ -109,4 +109,3 @@ std::set<Anope::string> WebCPanel::ChanServ::Modes::GetData()
 	v.insert("channel");
 	return v;
 }
-

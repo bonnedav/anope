@@ -1,6 +1,6 @@
 /*
  *
- * (C) 2003-2016 Anope Team
+ * (C) 2003-2019 Anope Team
  * Contact us at team@anope.org
  *
  * Please read COPYING and README for further details.
@@ -156,6 +156,7 @@ class CommandCSSetMisc : public Command
 	{
 		if (descriptions.count(source.command))
 		{
+			this->SendSyntax(source);
 			source.Reply("%s", Language::Translate(source.nc, descriptions[source.command].c_str()));
 			return true;
 		}

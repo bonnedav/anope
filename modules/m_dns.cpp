@@ -1,6 +1,6 @@
 /*
  *
- * (C) 2003-2016 Anope Team
+ * (C) 2003-2019 Anope Team
  * Contact us at team@anope.org
  *
  * Please read COPYING and README for further details.
@@ -109,7 +109,7 @@ class Packet : public Query
 
 		return name;
 	}
-		
+
 	Question UnpackQuestion(const unsigned char *input, unsigned short input_size, unsigned short &pos)
 	{
 		Question question;
@@ -212,7 +212,7 @@ class Packet : public Query
 	unsigned short id;
 	/* Flags on the packet */
 	unsigned short flags;
-	
+
 	Packet(Manager *m, sockaddrs *a) : manager(m), id(0), flags(0)
 	{
 		if (a)
@@ -248,7 +248,7 @@ class Packet : public Query
 
 		for (unsigned i = 0; i < qdcount; ++i)
 			this->questions.push_back(this->UnpackQuestion(input, len, packet_pos));
-	
+
 		for (unsigned i = 0; i < ancount; ++i)
 			this->answers.push_back(this->UnpackResourceRecord(input, len, packet_pos));
 
@@ -270,7 +270,7 @@ class Packet : public Query
 	{
 		if (output_size < HEADER_LENGTH)
 			throw SocketException("Unable to pack packet");
-	
+
 		unsigned short pos = 0;
 
 		output[pos++] = this->id >> 8;
@@ -296,32 +296,16 @@ class Packet : public Query
 				if (!ip.valid())
 					throw SocketException("Invalid IP");
 
-				if (q.name.find(':') != Anope::string::npos)
+				switch (ip.family())
 				{
-					const char *const hex = "0123456789abcdef";
-					char reverse_ip[128];
-					unsigned reverse_ip_count = 0;
-					for (int j = 15; j >= 0; --j)
-					{
-						reverse_ip[reverse_ip_count++] = hex[ip.sa6.sin6_addr.s6_addr[j] & 0xF];
-						reverse_ip[reverse_ip_count++] = '.';
-						reverse_ip[reverse_ip_count++] = hex[ip.sa6.sin6_addr.s6_addr[j] >> 4];
-						reverse_ip[reverse_ip_count++] = '.';
-					}
-					reverse_ip[reverse_ip_count++] = 0;
-
-					q.name = reverse_ip;
-					q.name += "ip6.arpa";
-				}
-				else
-				{
-					unsigned long forward = ip.sa4.sin_addr.s_addr;
-					in_addr reverse;
-					reverse.s_addr = forward << 24 | (forward & 0xFF00) << 8 | (forward & 0xFF0000) >> 8 | forward >> 24;
-
-					ip.ntop(AF_INET, &reverse);
-
-					q.name = ip.addr() + ".in-addr.arpa";
+					case AF_INET6:
+						q.name = ip.reverse() + ".ip6.arpa";
+						break;
+					case AF_INET:
+						q.name = ip.reverse() + ".in-addr.arpa";
+						break;
+					default:
+						throw SocketException("Unsupported IP Family");
 				}
 			}
 
@@ -433,7 +417,7 @@ class Packet : public Query
 						l = htonl(manager->GetSerial());
 						memcpy(&output[pos], &l, 4);
 						pos += 4;
-					
+
 						l = htonl(refresh); // Refresh
 						memcpy(&output[pos], &l, 4);
 						pos += 4;
@@ -459,7 +443,7 @@ class Packet : public Query
 						break;
 				}
 			}
-	
+
 		return pos;
 	}
 };
@@ -478,7 +462,7 @@ namespace DNS
 class TCPSocket : public ListenSocket
 {
 	Manager *manager;
-	
+
  public:
 	/* A TCP client */
 	class Client : public ClientSocket, public Timer, public ReplySocket
@@ -487,7 +471,7 @@ class TCPSocket : public ListenSocket
  		Packet *packet;
 		unsigned char packet_buffer[524];
 		int length;
-	
+
 	 public:
 		Client(Manager *m, TCPSocket *l, int fd, const sockaddrs &addr) : Socket(fd, l->IsIPv6()), ClientSocket(l, addr), Timer(5),
 			manager(m), packet(NULL), length(0)
@@ -500,7 +484,7 @@ class TCPSocket : public ListenSocket
 			Log(LOG_DEBUG_2) << "Resolver: Exiting client from " << clientaddr.addr();
 			delete packet;
 		}
-	
+
 		/* Times out after a few seconds */
 		void Tick(time_t) anope_override { }
 
@@ -560,13 +544,13 @@ class TCPSocket : public ListenSocket
 	};
 
 	TCPSocket(Manager *m, const Anope::string &ip, int port) : Socket(-1, ip.find(':') != Anope::string::npos), ListenSocket(ip, port, ip.find(':') != Anope::string::npos), manager(m) { }
-	
+
 	ClientSocket *OnAccept(int fd, const sockaddrs &addr) anope_override
 	{
 		return new Client(this->manager, this, fd, addr);
 	}
 };
-	
+
 /* Listens for UDP requests */
 class UDPSocket : public ReplySocket
 {
@@ -581,15 +565,15 @@ class UDPSocket : public ReplySocket
 		for (unsigned i = 0; i < packets.size(); ++i)
 			delete packets[i];
 	}
-	
+
 	void Reply(Packet *p) anope_override
 	{
 		packets.push_back(p);
 		SocketEngine::Change(this, true, SF_WRITABLE);
 	}
-	
+
 	std::deque<Packet *>& GetPackets() { return packets; }
-	
+
 	bool ProcessRead() anope_override
 	{
 		Log(LOG_DEBUG_2) << "Resolver: Reading from DNS UDP socket";
@@ -600,7 +584,7 @@ class UDPSocket : public ReplySocket
 		int length = recvfrom(this->GetFD(), reinterpret_cast<char *>(&packet_buffer), sizeof(packet_buffer), 0, &from_server.sa, &x);
 		return this->manager->HandlePacket(this, packet_buffer, length, &from_server);
 	}
-	
+
 	bool ProcessWrite() anope_override
 	{
 		Log(LOG_DEBUG_2) << "Resolver: Writing to DNS UDP socket";
@@ -623,7 +607,7 @@ class UDPSocket : public ReplySocket
 
 		if (packets.empty())
 			SocketEngine::Change(this, false, SF_WRITABLE);
-	
+
 		return true;
 	}
 };
@@ -689,7 +673,7 @@ class MyManager : public Manager, public Timer
 		delete tcpsock;
 
 		for (std::map<unsigned short, Request *>::iterator it = this->requests.begin(), it_end = this->requests.end(); it != it_end;)
-		{	
+		{
 			Request *request = it->second;
 			++it;
 
@@ -767,7 +751,7 @@ class MyManager : public Manager, public Timer
 		this->requests[req->id] = req;
 
 		req->SetSecs(timeout);
-	
+
 		Packet *p = new Packet(this, &this->addrs);
 		p->flags = QUERYFLAGS_RD;
 		p->id = req->id;
@@ -854,6 +838,9 @@ class MyManager : public Manager, public Timer
 				}
 			}
 
+			if (packet->answers.empty() && packet->authorities.empty() && packet->additional.empty() && packet->error == ERROR_NONE)
+				packet->error = ERROR_REFUSED; // usually safe, won't cause an NXDOMAIN to get cached
+
 			s->Reply(packet);
 			return true;
 		}
@@ -928,7 +915,7 @@ class MyManager : public Manager, public Timer
 			request->OnLookupComplete(&recv_packet);
 			this->AddCache(recv_packet);
 		}
-	
+
 		delete request;
 		return true;
 	}
@@ -965,7 +952,7 @@ class MyManager : public Manager, public Timer
 
 			packet->questions.push_back(Question(zone, QUERY_SOA));
 
-			new NotifySocket(ip.find(':') != Anope::string::npos ? AF_INET6 : AF_INET, packet);
+			new NotifySocket(ip.find(':') != Anope::string::npos, packet);
 		}
 	}
 
@@ -989,7 +976,7 @@ class MyManager : public Manager, public Timer
 				this->cache.erase(it);
 		}
 	}
-	
+
  private:
 	/** Add a record to the dns cache
 	 * @param r The record
@@ -1017,7 +1004,7 @@ class MyManager : public Manager, public Timer
 
 		return false;
 	}
-  
+
 };
 
 class ModuleDNS : public Module
@@ -1136,4 +1123,3 @@ class ModuleDNS : public Module
 };
 
 MODULE_INIT(ModuleDNS)
-

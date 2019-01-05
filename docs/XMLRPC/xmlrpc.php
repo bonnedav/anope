@@ -3,9 +3,10 @@
 /**
  * XMLRPC Functions
  *
- * (C) 2003-2016 Anope Team
+ * (C) 2003-2019 Anope Team
  * Contact us at team@anope.org
  */
+
 class AnopeXMLRPC
 {
     /**
@@ -113,7 +114,7 @@ class AnopeXMLRPC
     {
         return $this->run("channel", [$channel]);
     }
-    
+
     /**
      * Sent a notice to a user.
      * Returns an array containing channel information, or an array of size one

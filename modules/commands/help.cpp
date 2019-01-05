@@ -1,6 +1,6 @@
 /* Core functions
  *
- * (C) 2003-2016 Anope Team
+ * (C) 2003-2019 Anope Team
  * Contact us at team@anope.org
  *
  * Please read COPYING and README for further details.
@@ -40,7 +40,7 @@ class CommandHelp : public Command
 		FOREACH_RESULT(OnPreHelp, MOD_RESULT, (source, params));
 		if (MOD_RESULT == EVENT_STOP)
 			return;
-	
+
 		Anope::string source_command = source.command;
 		const BotInfo *bi = source.service;
 		const CommandInfo::map &map = source.c ? Config->Fantasy : bi->commands;
@@ -149,11 +149,11 @@ class CommandHelp : public Command
 
 				if (hide_privileged_commands && !info.permission.empty() && !source.HasCommand(info.permission))
 					continue;
-				
+
 				// Allow unregistered users to see help for commands that they explicitly request help for
 
 				const Anope::string &subcommand = params.size() > max ? params[max] : "";
-				source.command = full_command;
+				source.command = it->first;
 				if (!c->OnHelp(source, subcommand))
 					continue;
 
@@ -183,7 +183,7 @@ class CommandHelp : public Command
 			if (helped == false)
 				source.Reply(_("No help available for \002%s\002."), params[0].c_str());
 		}
-	
+
 		FOREACH_MOD(OnPostHelp, (source, params));
 
 		return;

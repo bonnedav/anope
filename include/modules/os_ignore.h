@@ -1,6 +1,6 @@
 /* OperServ ignore interface
  *
- * (C) 2003-2016 Anope Team
+ * (C) 2003-2019 Anope Team
  * Contact us at team@anope.org
  *
  * Please read COPYING and README for further details.
@@ -25,7 +25,7 @@ class IgnoreService : public Service
 {
  protected:
 	IgnoreService(Module *c) : Service(c, "IgnoreService", "ignore") { }
-	
+
  public:
 	virtual void AddIgnore(IgnoreData *) = 0;
 

@@ -1,6 +1,6 @@
 /*
  *
- * (C) 2003-2016 Anope Team
+ * (C) 2003-2019 Anope Team
  * Contact us at team@anope.org
  *
  * Please read COPYING and README for further details.
@@ -56,6 +56,11 @@ union CoreExport sockaddrs
 	 * @return The address
 	 */
 	Anope::string addr() const;
+
+	/** Get the reverse address represented by this addr
+	 * @return The reverse address
+	 */
+	Anope::string reverse() const;
 
 	/* Is this address ipv6? */
 	bool ipv6() const;

@@ -5,11 +5,11 @@
  * IMPORTANT: DATA HASHES CANNOT BE "DECRYPTED" BACK TO PLAIN TEXT.
  *
  * Modified for Anope.
- * (C) 2003-2016 Anope Team
+ * (C) 2003-2019 Anope Team
  * Contact us at team@anope.org
  *
- * Taken from InspIRCd ( www.inspircd.org )
- *  see http://wiki.inspircd.org/Credits
+ * Taken from InspIRCd (https://www.inspircd.org/),
+ * see https://wiki.inspircd.org/Credits
  *
  * This program is free but copyrighted software; see
  * the file COPYING for details.

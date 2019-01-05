@@ -1,6 +1,6 @@
 /* ChanServ core functions
  *
- * (C) 2003-2016 Anope Team
+ * (C) 2003-2019 Anope Team
  * Contact us at team@anope.org
  *
  * Original Coder: GeniusDex <geniusdex@anope.org>
@@ -61,7 +61,7 @@ class CommandCSEnforce : public Command
 		}
 
 		for (unsigned i = 0; i < users.size(); ++i)
-		{	
+		{
 			User *user = users[i];
 
 			Anope::string mask = ci->GetIdealBan(user);
@@ -158,7 +158,7 @@ class CommandCSEnforce : public Command
 		for (unsigned i = 0; i < users.size(); ++i)
 		{
 			User *user = users[i];
-	
+
 			Anope::string reason = Language::Translate(user, _("BANS enforced by ")) + source.GetNick();
 			ci->c->Kick(NULL, user, "%s", reason.c_str());
 		}
@@ -213,7 +213,7 @@ class CommandCSEnforce : public Command
 		for (unsigned i = 0; i < users.size(); ++i)
 		{
 			User *user = users[i];
-	
+
 			Anope::string reason = Language::Translate(user, _("LIMIT enforced by ")) + source.GetNick();
 			ci->c->Kick(NULL, user, "%s", reason.c_str());
 		}

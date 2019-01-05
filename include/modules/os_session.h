@@ -1,6 +1,6 @@
 /*
  *
- * (C) 2011-2016 Anope Team
+ * (C) 2011-2019 Anope Team
  * Contact us at team@anope.org
  *
  * Please read COPYING and README for further details.
@@ -48,7 +48,7 @@ class SessionService : public Service
 
 	virtual Exception *FindException(User *u) = 0;
 
-	virtual Exception *FindException(const Anope::string &host) = 0; 
+	virtual Exception *FindException(const Anope::string &host) = 0;
 
 	virtual ExceptionVector &GetExceptions() = 0;
 

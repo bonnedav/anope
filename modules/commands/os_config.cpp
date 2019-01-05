@@ -1,6 +1,6 @@
 /* OperServ core functions
  *
- * (C) 2003-2016 Anope Team
+ * (C) 2003-2019 Anope Team
  * Contact us at team@anope.org
  *
  * Please read COPYING and README for further details.
@@ -53,7 +53,7 @@ class CommandOSConfig : public Command
 			const Anope::string show_blocks[] = { "serverinfo", "networkinfo", "options", "" };
 
 			Log(LOG_ADMIN, source, this) << "VIEW";
-			
+
 			for (unsigned i = 0; !show_blocks[i].empty(); ++i)
 			{
 				Configuration::Block *block = Config->GetBlock(show_blocks[i]);

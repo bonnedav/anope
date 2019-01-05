@@ -1,6 +1,6 @@
 /* cs_seen: provides a seen command by tracking all users
  *
- * (C) 2003-2016 Anope Team
+ * (C) 2003-2019 Anope Team
  * Contact us at team@anope.org
  *
  * Please read COPYING and README for further details.
@@ -57,7 +57,7 @@ struct SeenInfo : Serializable
 	static Serializable* Unserialize(Serializable *obj, Serialize::Data &data)
 	{
 		Anope::string snick;
-		
+
 		data["nick"] >> snick;
 
 		SeenInfo *s;
@@ -260,6 +260,7 @@ class CommandSeen : public Command
 	{
 		this->SetDesc(_("Tells you about the last time a user was seen"));
 		this->SetSyntax(_("\037nick\037"));
+		this->AllowUnregistered(true);
 	}
 
 	void Execute(CommandSource &source, const std::vector<Anope::string> &params) anope_override
@@ -299,7 +300,7 @@ class CommandSeen : public Command
 		if (u2)
 			onlinestatus = ".";
 		else
-			onlinestatus = Anope::printf(_(" but %s mysteriously dematerialized."), target.c_str());
+			onlinestatus = Anope::printf(Language::Translate(source.nc, _(" but %s mysteriously dematerialized.")), target.c_str());
 
 		Anope::string timebuf = Anope::Duration(Anope::CurTime - info->last, source.nc);
 		Anope::string timebuf2 = Anope::strftime(info->last, source.nc, true);
@@ -313,9 +314,9 @@ class CommandSeen : public Command
 		{
 			u2 = User::Find(info->nick2, true);
 			if (u2)
-				onlinestatus = Anope::printf( _(". %s is still online."), u2->nick.c_str());
+				onlinestatus = Anope::printf(Language::Translate(source.nc, _(". %s is still online.")), u2->nick.c_str());
 			else
-				onlinestatus = Anope::printf(_(", but %s mysteriously dematerialized."), info->nick2.c_str());
+				onlinestatus = Anope::printf(Language::Translate(source.nc, _(", but %s mysteriously dematerialized.")), info->nick2.c_str());
 
 			source.Reply(_("%s (%s) was last seen changing nick to %s %s ago%s"),
 				target.c_str(), info->vhost.c_str(), info->nick2.c_str(), timebuf.c_str(), onlinestatus.c_str());

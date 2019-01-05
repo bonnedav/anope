@@ -1,6 +1,6 @@
 /* POSIX emulation layer for Windows.
  *
- * (C) 2008-2016 Anope Team
+ * (C) 2008-2019 Anope Team
  * Contact us at team@anope.org
  *
  * Please read COPYING and README for further details.
@@ -56,6 +56,6 @@ int pipe(int fds[2])
 
 	fds[0] = cfd;
 	fds[1] = afd;
-	
+
 	return 0;
 }

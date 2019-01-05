@@ -1,19 +1,19 @@
 /* Module for providing bcrypt hashing
  *
- * (C) 2003-2016 Anope Team
+ * (C) 2003-2019 Anope Team
  * Contact us at team@anope.org
  *
  * This program is free but copyrighted software; see the file COPYING for
  * details.
  *
  * Most of the code in this file is taken from
- * http://openwall.com/crypt/crypt_blowfish-1.2.tar.gz
+ * https://www.openwall.com/crypt/crypt_blowfish-1.2.tar.gz
 */
 
 /*
  * The crypt_blowfish homepage is:
  *
- *	http://www.openwall.com/crypt/
+ *	https://www.openwall.com/crypt/
  *
  * This code comes from John the Ripper password cracker, with reentrant
  * and crypt(3) interfaces added, but optimizations specific to password
@@ -48,7 +48,7 @@
  *
  * There's a paper on the algorithm that explains its design decisions:
  *
- *	http://www.usenix.org/events/usenix99/provos.html
+ *	https://www.usenix.org/legacy/events/usenix99/provos.html
  *
  * Some of the tricks in BF_ROUND might be inspired by Eric Young's
  * Blowfish library (I can't be sure if I would think of something if I

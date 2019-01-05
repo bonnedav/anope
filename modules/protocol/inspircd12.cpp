@@ -1,6 +1,6 @@
 /* inspircd 1.2 functions
  *
- * (C) 2003-2016 Anope Team
+ * (C) 2003-2019 Anope Team
  * Contact us at team@anope.org
  *
  * Please read COPYING and README for further details.
@@ -105,13 +105,21 @@ class InspIRCd12Proto : public IRCDProto
 
 	void SendAkillDel(const XLine *x) anope_override
 	{
-		/* InspIRCd may support regex bans */
+		/* InspIRCd may support regex bans
+		 * Mask is expected in format: 'n!u@h\sr' and spaces as '\s'
+		 * We remove the '//' and replace '#' and any ' ' with '\s'
+		 */
 		if (x->IsRegex() && Servers::Capab.count("RLINE"))
 		{
 			Anope::string mask = x->mask;
-			size_t h = x->mask.find('#');
+			if (mask.length() >= 2 && mask[0] == '/' && mask[mask.length() - 1] == '/')
+				mask = mask.substr(1, mask.length() - 2);
+			size_t h = mask.find('#');
 			if (h != Anope::string::npos)
-				mask = mask.replace(h, 1, ' ');
+			{
+				mask = mask.replace(h, 1, "\\s");
+				mask = mask.replace_all_cs(" ", "\\s");
+			}
 			SendDelLine("R", mask);
 			return;
 		}
@@ -151,13 +159,14 @@ class InspIRCd12Proto : public IRCDProto
 
 	void SendVhostDel(User *u) anope_override
 	{
-		if (u->HasMode("CLOAK"))
-			this->SendChgHostInternal(u->nick, u->chost);
-		else
-			this->SendChgHostInternal(u->nick, u->host);
+		UserMode *um = ModeManager::FindUserModeByName("CLOAK");
 
-		if (Servers::Capab.count("CHGIDENT") && u->GetIdent() != u->GetVIdent())
-			this->SendChgIdentInternal(u->nick, u->GetIdent());
+		if (um && !u->HasMode(um->name))
+			// Just set +x if we can
+			u->SetMode(NULL, um);
+		else
+			// Try to restore cloaked host
+			this->SendChgHostInternal(u->nick, u->chost);
 	}
 
 	void SendAkill(User *u, XLine *x) anope_override
@@ -167,13 +176,21 @@ class InspIRCd12Proto : public IRCDProto
 		if (timeleft > 172800 || !x->expires)
 			timeleft = 172800;
 
-		/* InspIRCd may support regex bans, if they do we can send this and forget about it */
+		/* InspIRCd may support regex bans, if they do we can send this and forget about it
+		 * Mask is expected in format: 'n!u@h\sr' and spaces as '\s'
+		 * We remove the '//' and replace '#' and any ' ' with '\s'
+		 */
 		if (x->IsRegex() && Servers::Capab.count("RLINE"))
 		{
 			Anope::string mask = x->mask;
-			size_t h = x->mask.find('#');
+			if (mask.length() >= 2 && mask[0] == '/' && mask[mask.length() - 1] == '/')
+				mask = mask.substr(1, mask.length() - 2);
+			size_t h = mask.find('#');
 			if (h != Anope::string::npos)
-				mask = mask.replace(h, 1, ' ');
+			{
+				mask = mask.replace(h, 1, "\\s");
+				mask = mask.replace_all_cs(" ", "\\s");
+			}
 			SendAddLine("R", mask, timeleft, x->by, x->GetReason());
 			return;
 		}
@@ -409,6 +426,11 @@ class InspIRCd12Proto : public IRCDProto
 	void SendSVSLogin(const Anope::string &uid, const Anope::string &acc, const Anope::string &vident, const Anope::string &vhost) anope_override
 	{
 		UplinkSocket::Message(Me) << "METADATA " << uid << " accountname :" << acc;
+		
+		if (!vident.empty())
+			UplinkSocket::Message(Me) << "ENCAP " << uid.substr(0, 3) << " CHGIDENT " << uid << " " << vident;
+		if (!vhost.empty())
+			UplinkSocket::Message(Me) << "ENCAP " << uid.substr(0, 3) << " CHGHOST " << uid << " " << vhost;
 
 		SASLUser su;
 		su.uid = uid;
@@ -873,7 +895,7 @@ struct IRCDMessageEncap : IRCDMessage
 
 	void Run(MessageSource &source, const std::vector<Anope::string> &params) anope_override
 	{
-		if (Anope::Match(Me->GetSID(), params[0]) == false)
+		if (!Anope::Match(Me->GetSID(), params[0]) && !Anope::Match(Me->GetName(), params[0]))
 			return;
 
 		if (SASL::sasl && params[1] == "SASL" && params.size() >= 6)
@@ -950,7 +972,7 @@ struct IRCDMessageFJoin : IRCDMessage
 			sju.second = User::Find(buf);
 			if (!sju.second)
 			{
-				Log(LOG_DEBUG) << "FJOIN for non-existent user " << buf << " on " << params[0];
+				Log(LOG_DEBUG) << "FJOIN for nonexistent user " << buf << " on " << params[0];
 				continue;
 			}
 
@@ -1147,12 +1169,7 @@ struct IRCDMessageMode : IRCDMessage
 			   users modes, we have to kludge this
 			   as it slightly breaks RFC1459
 			 */
-			User *u = source.GetUser();
-			// This can happen with server-origin modes.
-			if (!u)
-				u = User::Find(params[0]);
-			// if it's still null, drop it like fire.
-			// most likely situation was that server introduced a nick which we subsequently akilled
+			User *u = User::Find(params[0]);
 			if (u)
 				u->SetModesInternal(source, "%s", params[1].c_str());
 		}
@@ -1231,7 +1248,7 @@ struct IRCDMessageServer : IRCDMessage
 struct IRCDMessageSQuit : Message::SQuit
 {
 	IRCDMessageSQuit(Module *creator) : Message::SQuit(creator) { }
-	
+
 	void Run(MessageSource &source, const std::vector<Anope::string> &params) anope_override
 	{
 		if (params[0] == rsquit_id || params[0] == rsquit_server)

@@ -1,5 +1,5 @@
 /*
- * (C) 2003-2016 Anope Team
+ * (C) 2003-2019 Anope Team
  * Contact us at team@anope.org
  *
  * Please read COPYING and README for further details.
@@ -25,4 +25,3 @@ bool WebCPanel::ChanServ::Info::OnRequest(HTTPProvider *server, const Anope::str
 	page.Serve(server, page_name, client, message, reply, replacements);
 	return true;
 }
-

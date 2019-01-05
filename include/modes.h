@@ -1,7 +1,7 @@
 /* Mode support
  *
  * (C) 2008-2011 Adam <Adam@anope.org>
- * (C) 2008-2016 Anope Team <team@anope.org>
+ * (C) 2008-2019 Anope Team <team@anope.org>
  *
  * Please read COPYING and README for further details.
  */
@@ -197,7 +197,7 @@ class CoreExport ChannelModeStatus : public ChannelMode
 	/** constructor
 	 * @param name The mode name
 	 * @param mc The mode char
-	 * @param msymbol The symbol for the mode, eg @ % 
+	 * @param msymbol The symbol for the mode, eg @ %
 	 * @param mlevel A level for the mode, which is usually determined by the PREFIX capab
 	 */
 	ChannelModeStatus(const Anope::string &name, char mc, char msymbol, short mlevel);

@@ -1,6 +1,6 @@
 /* ChanServ core functions
  *
- * (C) 2003-2016 Anope Team
+ * (C) 2003-2019 Anope Team
  * Contact us at team@anope.org
  *
  * Please read COPYING and README for further details.
@@ -133,7 +133,7 @@ class CommandEntryMessage : public Command
 
 		source.Reply(_("End of entry message list."));
 	}
-		
+
 	void DoAdd(CommandSource &source, ChannelInfo *ci, const Anope::string &message)
 	{
 		EntryMessageList *messages = ci->Require<EntryMessageList>("entrymsg");

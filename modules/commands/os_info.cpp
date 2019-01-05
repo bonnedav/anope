@@ -1,6 +1,6 @@
 /* OperServ core functions
  *
- * (C) 2003-2016 Anope Team
+ * (C) 2003-2019 Anope Team
  * Contact us at team@anope.org
  *
  * Please read COPYING and README for further details.
@@ -18,7 +18,7 @@ struct OperInfo : Serializable
 	OperInfo() : Serializable("OperInfo"), created(0) { }
 	OperInfo(const Anope::string &t, const Anope::string &i, const Anope::string &a, time_t c) :
 		Serializable("OperInfo"), target(t), info(i), adder(a), created(c) { }
-	
+
 	~OperInfo();
 
 	void Serialize(Serialize::Data &data) const anope_override
@@ -74,7 +74,7 @@ Serializable *OperInfo::Unserialize(Serializable *obj, Serialize::Data &data)
 	Extensible *e = OperInfos::Find(starget);
 	if (!e)
 		return NULL;
-	
+
 	OperInfos *oi = e->Require<OperInfos>("operinfo");
 	OperInfo *o;
 	if (obj)

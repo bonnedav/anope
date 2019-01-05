@@ -1,6 +1,6 @@
 /* Bahamut functions
  *
- * (C) 2003-2016 Anope Team
+ * (C) 2003-2019 Anope Team
  * Contact us at team@anope.org
  *
  * Please read COPYING and README for further details.
@@ -373,7 +373,7 @@ struct IRCDMessageNick : IRCDMessage
 			Server *s = Server::Find(params[6]);
 			if (s == NULL)
 			{
-				Log(LOG_DEBUG) << "User " << params[0] << " introduced from non-existent server " << params[6] << "?";
+				Log(LOG_DEBUG) << "User " << params[0] << " introduced from nonexistent server " << params[6] << "?";
 				return;
 			}
 
@@ -449,7 +449,7 @@ struct IRCDMessageSJoin : IRCDMessage
 				sju.second = User::Find(buf);
 				if (!sju.second)
 				{
-					Log(LOG_DEBUG) << "SJOIN for non-existent user " << buf << " on " << params[1];
+					Log(LOG_DEBUG) << "SJOIN for nonexistent user " << buf << " on " << params[1];
 					continue;
 				}
 

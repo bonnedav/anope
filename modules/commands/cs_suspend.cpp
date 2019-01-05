@@ -1,6 +1,6 @@
 /* ChanServ core functions
  *
- * (C) 2003-2016 Anope Team
+ * (C) 2003-2019 Anope Team
  * Contact us at team@anope.org
  *
  * Please read COPYING and README for further details.
@@ -54,7 +54,7 @@ class CommandCSSuspend : public Command
 {
  public:
 	CommandCSSuspend(Module *creator) : Command(creator, "chanserv/suspend", 2, 3)
-	{ 
+	{
 		this->SetDesc(_("Prevent a channel from being used preserving channel data and settings"));
 		this->SetSyntax(_("\037channel\037 [+\037expiry\037] [\037reason\037]"));
 	}
@@ -75,7 +75,7 @@ class CommandCSSuspend : public Command
 		else
 		{
 			expiry_secs = Anope::DoTime(expiry);
-			if (expiry_secs == -1)
+			if (expiry_secs < 0)
 			{
 				source.Reply(BAD_EXPIRY_TIME);
 				return;

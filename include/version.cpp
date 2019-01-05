@@ -1,6 +1,6 @@
 /* Build bumper
  *
- * (C) 2003-2016 Anope Team
+ * (C) 2003-2019 Anope Team
  * Contact us at team@anope.org
  *
  * Please read COPYING and README for further details.
@@ -28,7 +28,7 @@ static std::string get_git_hash(const std::string &git_dir)
 		fd.close();
 		return "";
 	}
-	
+
 	fd.close();
 
 	filebuf = filebuf.substr(5);

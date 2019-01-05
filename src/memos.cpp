@@ -1,6 +1,6 @@
 /* MemoServ functions.
  *
- * (C) 2003-2016 Anope Team
+ * (C) 2003-2019 Anope Team
  * Contact us at team@anope.org
  *
  * Please read COPYING and README for further details.
@@ -49,7 +49,7 @@ Serializable* Memo::Unserialize(Serializable *obj, Serialize::Data &data)
 	Anope::string owner;
 
 	data["owner"] >> owner;
-	
+
 	bool ischan;
 	MemoInfo *mi = MemoInfo::GetMemoInfo(owner, ischan);
 	if (!mi)
@@ -138,4 +138,3 @@ MemoInfo *MemoInfo::GetMemoInfo(const Anope::string &target, bool &ischan)
 
 	return NULL;
 }
-

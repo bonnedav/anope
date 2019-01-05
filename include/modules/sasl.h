@@ -1,6 +1,6 @@
 /*
  *
- * (C) 2014-2016 Anope Team
+ * (C) 2014-2019 Anope Team
  * Contact us at team@anope.org
  *
  * Please read COPYING and README for further details.
@@ -46,6 +46,7 @@ namespace SASL
 	{
 		time_t created;
 		Anope::string uid;
+		Anope::string hostname, ip;
 		Reference<Mechanism> mech;
 
 		Session(Mechanism *m, const Anope::string &u) : created(Anope::CurTime), uid(u), mech(m) { }
@@ -76,9 +77,10 @@ namespace SASL
 	class IdentifyRequest : public ::IdentifyRequest
 	{
 		Anope::string uid;
+		Anope::string hostname, ip;
 
 	 public:
-		IdentifyRequest(Module *m, const Anope::string &id, const Anope::string &acc, const Anope::string &pass) : ::IdentifyRequest(m, acc, pass), uid(id) { }
+		IdentifyRequest(Module *m, const Anope::string &id, const Anope::string &acc, const Anope::string &pass, const Anope::string &h, const Anope::string &i) : ::IdentifyRequest(m, acc, pass), uid(id), hostname(h), ip(i) { }
 
 		void OnSuccess() anope_override
 		{
@@ -86,7 +88,7 @@ namespace SASL
 				return;
 
 			NickAlias *na = NickAlias::Find(GetAccount());
-			if (!na || na->nc->HasExt("NS_SUSPENDED"))
+			if (!na || na->nc->HasExt("NS_SUSPENDED") || na->nc->HasExt("UNCONFIRMED"))
 				return OnFail();
 
 			unsigned int maxlogins = Config->GetModule("ns_identify")->Get<unsigned int>("maxlogins");
@@ -96,7 +98,11 @@ namespace SASL
 			Session *s = sasl->GetSession(uid);
 			if (s)
 			{
-				Log(Config->GetClient("NickServ"), "sasl") << "A user identified to account " << this->GetAccount() << " using SASL";
+				Anope::string user = "A user";
+				if (!hostname.empty() && !ip.empty())
+					user = hostname + " (" + ip + ")";
+
+				Log(this->GetOwner(), "sasl", Config->GetClient("NickServ")) << user << " identified to account " << this->GetAccount() << " using SASL";
 				sasl->Succeed(s, na->nc);
 				delete s;
 			}
@@ -120,8 +126,14 @@ namespace SASL
 				accountstatus = "nonexistent ";
 			else if (na->nc->HasExt("NS_SUSPENDED"))
 				accountstatus = "suspended ";
+			else if (na->nc->HasExt("UNCONFIRMED"))
+				accountstatus = "unconfirmed ";
 
-			Log(Config->GetClient("NickServ"), "sasl") << "A user failed to identify for " << accountstatus << "account " << this->GetAccount() << " using SASL";
+			Anope::string user = "A user";
+			if (!hostname.empty() && !ip.empty())
+				user = hostname + " (" + ip + ")";
+
+			Log(this->GetOwner(), "sasl", Config->GetClient("NickServ")) << user << " failed to identify for " << accountstatus << "account " << this->GetAccount() << " using SASL";
 		}
 	};
 }

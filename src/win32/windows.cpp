@@ -1,7 +1,7 @@
 /* POSIX emulation layer for Windows.
  *
  * (C) 2008-2011 Robin Burchell <w00t@inspircd.org>
- * (C) 2008-2016 Anope Team <team@anope.org>
+ * (C) 2008-2019 Anope Team <team@anope.org>
  *
  * Please read COPYING and README for further details.
  *
@@ -56,11 +56,11 @@ USHORT WindowsGetLanguage(const Anope::string &lang)
 	for (int i = 0; i < sizeof(WindowsLanguages) / sizeof(WindowsLanguage); ++i)
 	{
 		WindowsLanguage &l = WindowsLanguages[i];
-		
+
 		if (lang == l.languageName || !lang.find(l.languageName + "."))
 			return l.windowsLanguageName;
 	}
-	
+
 	return LANG_NEUTRAL;
 }
 
@@ -73,10 +73,10 @@ int gettimeofday(timeval *tv, void *)
 {
 	SYSTEMTIME st;
 	GetSystemTime(&st);
-	
+
 	tv->tv_sec = Anope::CurTime;
 	tv->tv_usec = st.wMilliseconds;
-	
+
 	return 0;
 }
 
@@ -248,7 +248,7 @@ int mkstemp(char *input)
 		errno = EEXIST;
 		return -1;
 	}
-	
+
 	int fd = open(input, O_WRONLY | O_CREAT, S_IREAD | S_IWRITE);
 	return fd;
 }

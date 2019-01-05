@@ -1,6 +1,6 @@
 /* Global core functions
  *
- * (C) 2003-2016 Anope Team
+ * (C) 2003-2019 Anope Team
  * Contact us at team@anope.org
  *
  * Please read COPYING and README for further details.
@@ -68,7 +68,7 @@ class GlobalCore : public Module, public GlobalService
 		if (!gl.empty())
 			this->SendGlobal(Global, "", gl);
 	}
-	
+
 	void OnShutdown() anope_override
 	{
 		const Anope::string &gl = Config->GetModule(this)->Get<const Anope::string>("globaloncycledown");
@@ -93,4 +93,3 @@ class GlobalCore : public Module, public GlobalService
 };
 
 MODULE_INIT(GlobalCore)
-

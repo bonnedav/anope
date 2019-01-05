@@ -1,6 +1,6 @@
 /* NickServ core functions
  *
- * (C) 2003-2016 Anope Team
+ * (C) 2003-2019 Anope Team
  * Contact us at team@anope.org
  *
  * Please read COPYING and README for further details.
@@ -28,7 +28,7 @@ class NSRecoverRequest : public IdentifyRequest
 	CommandSource source;
 	Command *cmd;
 	Anope::string user;
- 
+
  public:
 	NSRecoverRequest(Module *o, CommandSource &src, Command *c, const Anope::string &nick, const Anope::string &pass) : IdentifyRequest(o, nick, pass), source(src), cmd(c), user(nick) { }
 

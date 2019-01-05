@@ -1,6 +1,6 @@
 /*
  *
- * (C) 2003-2016 Anope Team
+ * (C) 2003-2019 Anope Team
  * Contact us at team@anope.org
  *
  * Please read COPYING and README for further details.
@@ -56,7 +56,7 @@ bool Mail::Send(User *u, NickCore *nc, BotInfo *service, const Anope::string &su
 		return false;
 
 	Configuration::Block *b = Config->GetBlock("mail");
-	
+
 	if (!u)
 	{
 		if (!b->Get<bool>("usemail") || b->Get<const Anope::string>("sendfrom").empty())

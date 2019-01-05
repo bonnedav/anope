@@ -1,6 +1,6 @@
 /* ChanServ core functions
  *
- * (C) 2003-2016 Anope Team
+ * (C) 2003-2019 Anope Team
  * Contact us at team@anope.org
  *
  * Please read COPYING and README for further details.
@@ -70,7 +70,7 @@ class CommandCSBan : public Command
 		if (params[1][0] == '+')
 		{
 			ban_time = Anope::DoTime(params[1]);
-			if (ban_time == -1)
+			if (ban_time < 0)
 			{
 				source.Reply(BAD_EXPIRY_TIME);
 				return;

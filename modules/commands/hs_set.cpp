@@ -1,6 +1,6 @@
 /* HostServ core functions
  *
- * (C) 2003-2016 Anope Team
+ * (C) 2003-2019 Anope Team
  * Contact us at team@anope.org
  *
  * Please read COPYING and README for further details.
@@ -110,7 +110,7 @@ class CommandHSSetAll : public Command
 	{
 		if (!na || !na->HasVhost())
 			return;
-	
+
 		for (unsigned i = 0; i < na->nc->aliases->size(); ++i)
 		{
 			NickAlias *nick = na->nc->aliases->at(i);

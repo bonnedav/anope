@@ -1,5 +1,5 @@
 /*
- * (C) 2003-2016 Anope Team
+ * (C) 2003-2019 Anope Team
  * Contact us at team@anope.org
  *
  * Please read COPYING and README for further details.
@@ -25,7 +25,7 @@ bool WebCPanel::ChanServ::Drop::OnRequest(HTTPProvider *server, const Anope::str
 			params.push_back(channel);
 			params.push_back(channel);
 
-			WebPanel::RunCommand(na->nc->display, na->nc, "ChanServ", "chanserv/drop", params, replacements);
+			WebPanel::RunCommand(client, na->nc->display, na->nc, "ChanServ", "chanserv/drop", params, replacements);
 		}
 		else
 			replacements["MESSAGES"] = "Invalid Confirmation";

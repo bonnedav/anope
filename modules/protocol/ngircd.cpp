@@ -1,7 +1,7 @@
 /* ngIRCd Protocol module for Anope IRC Services
  *
  * (C) 2011-2012, 2014 Alexander Barton <alex@barton.de>
- * (C) 2011-2016 Anope Team <team@anope.org>
+ * (C) 2011-2019 Anope Team <team@anope.org>
  *
  * Please read COPYING and README for further details.
  *
@@ -108,14 +108,6 @@ class ngIRCdProto : public IRCDProto
 		}
 	}
 
-	void SendKickInternal(const MessageSource &source, const Channel *chan, User *user, const Anope::string &buf) anope_override
-	{
-		if (!buf.empty())
-			UplinkSocket::Message(source) << "KICK " << chan->name << " " << user->nick << " :" << buf;
-		else
-			UplinkSocket::Message(source) << "KICK " << chan->name << " " << user->nick;
-	}
-
 	void SendLogin(User *u, NickAlias *na) anope_override
 	{
 		UplinkSocket::Message(Me) << "METADATA " << u->GetUID() << " accountname :" << na->nc->display;
@@ -126,28 +118,10 @@ class ngIRCdProto : public IRCDProto
 		UplinkSocket::Message(Me) << "METADATA " << u->GetUID() << " accountname :";
 	} 
 
-	void SendModeInternal(const MessageSource &source, const Channel *dest, const Anope::string &buf) anope_override
-	{
-		UplinkSocket::Message(source) << "MODE " << dest->name << " " << buf;
-	}
-
-	void SendPartInternal(User *u, const Channel *chan, const Anope::string &buf) anope_override
-	{
-		if (!buf.empty())
-			UplinkSocket::Message(u) << "PART " << chan->name << " :" << buf;
-		else
-			UplinkSocket::Message(u) << "PART " << chan->name;
-	}
-
 	/* SERVER name hop descript */
 	void SendServer(const Server *server) anope_override
 	{
 		UplinkSocket::Message() << "SERVER " << server->GetName() << " " << server->GetHops() << " :" << server->GetDescription();
-	}
-
-	void SendTopic(const MessageSource &source, Channel *c) anope_override
-	{
-		UplinkSocket::Message(source) << "TOPIC " << c->name << " :" << c->topic;
 	}
 
 	void SendVhost(User *u, const Anope::string &vIdent, const Anope::string &vhost) anope_override
@@ -343,7 +317,7 @@ struct IRCDMessageMetadata : IRCDMessage
 		User *u = User::Find(params[0]);
 		if (!u)
 		{
-			Log() << "received METADATA for non-existent user " << params[0];
+			Log(LOG_DEBUG) << "received METADATA for nonexistent user " << params[0];
 			return;
 		}
 		if (params[1].equals_cs("accountname"))
@@ -452,7 +426,7 @@ struct IRCDMessageNick : IRCDMessage
 			Server *s = Server::Find(params[4]);
 			if (s == NULL)
 			{
-				Log(LOG_DEBUG) << "User " << params[0] << " introduced from non-existent server " << params[4] << "?";
+				Log(LOG_DEBUG) << "User " << params[0] << " introduced from nonexistent server " << params[4] << "?";
 				return;
 			}
 			User::OnIntroduce(params[0], params[2], params[3], "", "", s, params[6], Anope::CurTime, params[5], "", NULL);
@@ -501,11 +475,11 @@ struct IRCDMessageNJoin : IRCDMessage
 			sju.second = User::Find(buf);
 			if (!sju.second)
 			{
-				Log(LOG_DEBUG) << "NJOIN for non-existent user " << buf << " on " << params[0];
+				Log(LOG_DEBUG) << "NJOIN for nonexistent user " << buf << " on " << params[0];
 				continue;
 			}
 			users.push_back(sju);
-		} 
+		}
 
 		Message::Join::SJoin(source, params[0], 0, "", users);
 	}
@@ -588,7 +562,7 @@ struct IRCDMessageTopic : IRCDMessage
 		Channel *c = Channel::Find(params[0]);
 		if (!c)
 		{
-			Log(LOG_DEBUG) << "TOPIC for non-existent channel " << params[0];
+			Log(LOG_DEBUG) << "TOPIC for nonexistent channel " << params[0];
 			return;
 		}
 		c->ChangeTopicInternal(source.GetUser(), source.GetName(), params[1], Anope::CurTime);

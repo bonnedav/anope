@@ -1,6 +1,6 @@
 /*
  *
- * (C) 2011-2016 Anope Team
+ * (C) 2011-2019 Anope Team
  * Contact us at team@anope.org
  *
  * Please read COPYING and README for further details.
@@ -39,11 +39,11 @@ class NewsService : public Service
 	NewsService(Module *m) : Service(m, "NewsService", "news") { }
 
 	virtual NewsItem *CreateNewsItem() = 0;
-	
+
 	virtual void AddNewsItem(NewsItem *n) = 0;
-	
+
 	virtual void DelNewsItem(NewsItem *n) = 0;
-	
+
 	virtual std::vector<NewsItem *> &GetNewsList(NewsType t) = 0;
 };
 

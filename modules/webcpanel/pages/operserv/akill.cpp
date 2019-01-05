@@ -1,5 +1,5 @@
 /*
- * (C) 2003-2016 Anope Team
+ * (C) 2003-2019 Anope Team
  * Contact us at team@anope.org
  *
  * Please read COPYING and README for further details.
@@ -34,7 +34,7 @@ bool WebCPanel::OperServ::Akill::OnRequest(HTTPProvider *server, const Anope::st
 			cmdstr << " " << HTTPUtils::URLDecode(message.post_data["mask"]);
 			cmdstr << " " << HTTPUtils::URLDecode(message.post_data["reason"]);
 			params.push_back(cmdstr.str());
-			WebPanel::RunCommand(na->nc->display, na->nc, "OperServ", "operserv/akill", params, replacements);
+			WebPanel::RunCommand(client, na->nc->display, na->nc, "OperServ", "operserv/akill", params, replacements);
 		}
 
 		if (message.get_data["del"] == "1" && message.get_data.count("number") > 0)
@@ -42,7 +42,7 @@ bool WebCPanel::OperServ::Akill::OnRequest(HTTPProvider *server, const Anope::st
 			std::vector<Anope::string> params;
 			params.push_back("DEL");
 			params.push_back(HTTPUtils::URLDecode(message.get_data["number"]));
-			WebPanel::RunCommand(na->nc->display, na->nc, "OperServ", "operserv/akill", params, replacements);
+			WebPanel::RunCommand(client, na->nc->display, na->nc, "OperServ", "operserv/akill", params, replacements);
 		}
 
 		for (unsigned i = 0, end = akills->GetCount(); i < end; ++i)
@@ -61,4 +61,3 @@ bool WebCPanel::OperServ::Akill::OnRequest(HTTPProvider *server, const Anope::st
 	page.Serve(server, page_name, client, message, reply, replacements);
 	return true;
 }
-

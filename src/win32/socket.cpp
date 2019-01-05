@@ -1,6 +1,6 @@
 /* POSIX emulation layer for Windows.
  *
- * (C) 2008-2016 Anope Team
+ * (C) 2008-2019 Anope Team
  * Contact us at team@anope.org
  *
  * Please read COPYING and README for further details.
@@ -86,7 +86,7 @@ int windows_inet_pton(int af, const char *src, void *dst)
 		}
 		return 1;
 	}
-	
+
 	return 0;
 }
 

@@ -1,3 +1,11 @@
+/*
+ *
+ * (C) 2013-2019 Anope Team
+ * Contact us at team@anope.org
+ *
+ * Please read COPYING and README for further details.
+ */
+
 #include "irc2sql.h"
 
 void IRC2SQL::RunQuery(const SQL::Query &q)
@@ -58,4 +66,3 @@ bool IRC2SQL::HasEvent(const Anope::string &table)
 			return true;
 	return false;
 }
-

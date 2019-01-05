@@ -1,6 +1,6 @@
 /*
  *
- * (C) 2003-2016 Anope Team
+ * (C) 2003-2019 Anope Team
  * Contact us at team@anope.org
  *
  * Please read COPYING and README for further details.
@@ -179,6 +179,12 @@ class DatabaseRedis : public Module, public Pipe
 
 	EventReturn OnLoadDatabase() anope_override
 	{
+		if (!redis)
+		{
+			Log(this) << "Unable to load database - unable to find redis provider";
+			return EVENT_CONTINUE;
+		}
+
 		const std::vector<Anope::string> type_order = Serialize::Type::GetTypeOrder();
 		for (unsigned i = 0; i < type_order.size(); ++i)
 		{
@@ -186,7 +192,13 @@ class DatabaseRedis : public Module, public Pipe
 			this->OnSerializeTypeCreate(sb);
 		}
 
-		while (redis->BlockAndProcess());
+		while (!redis->IsSocketDead() && redis->BlockAndProcess());
+
+		if (redis->IsSocketDead())
+		{
+			Log(this) << "I/O error while loading redis database - is it online?";
+			return EVENT_CONTINUE;
+		}
 
 		redis->Subscribe(&this->sl, "__keyspace@*__:hash:*");
 
@@ -201,7 +213,7 @@ class DatabaseRedis : public Module, public Pipe
 		std::vector<Anope::string> args;
 		args.push_back("SMEMBERS");
 		args.push_back("ids:" + sb->GetName());
-		
+
 		redis->SendCommand(new TypeLoader(this, sb->GetName()), args);
 	}
 
@@ -214,6 +226,18 @@ class DatabaseRedis : public Module, public Pipe
 	void OnSerializableDestruct(Serializable *obj) anope_override
 	{
 		Serialize::Type *t = obj->GetSerializableType();
+
+		if (t == NULL)
+		{
+			/* This is probably the module providing the type unloading.
+			 *
+			 * The types get registered after the extensible container is
+			 * registered so that unserialization on module load can insert
+			 * into the extensible container. So, the type destructs prior to
+			 * the extensible container, which then triggers this
+			 */
+			return;
+		}
 
 		std::vector<Anope::string> args;
 		args.push_back("HGETALL");
@@ -456,14 +480,14 @@ void SubscriptionListener::OnResult(const Reply &r)
 	 */
 	if (r.multi_bulk.size() != 4)
 		return;
-	
+
 	size_t sz = r.multi_bulk[2]->bulk.find(':');
 	if (sz == Anope::string::npos)
 		return;
-	
+
 	const Anope::string &key = r.multi_bulk[2]->bulk.substr(sz + 1),
 				&op = r.multi_bulk[3]->bulk;
-	
+
 	sz = key.rfind(':');
 	if (sz == Anope::string::npos)
 		return;
@@ -479,7 +503,7 @@ void SubscriptionListener::OnResult(const Reply &r)
 
 	if (s_type == NULL)
 		return;
-	
+
 	uint64_t obj_id;
 	try
 	{

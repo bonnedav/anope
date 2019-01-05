@@ -1,5 +1,5 @@
 /*
- * (C) 2003-2016 Anope Team
+ * (C) 2003-2019 Anope Team
  * Contact us at team@anope.org
  *
  * Please read COPYING and README for further details.
@@ -20,7 +20,7 @@ bool WebCPanel::NickServ::Cert::OnRequest(HTTPProvider *server, const Anope::str
 		params.push_back("ADD");
 		params.push_back(message.post_data["certfp"]);
 
-		WebPanel::RunCommand(na->nc->display, na->nc, "NickServ", "nickserv/cert", params, replacements);
+		WebPanel::RunCommand(client, na->nc->display, na->nc, "NickServ", "nickserv/cert", params, replacements);
 	}
 	else if (message.get_data.count("del") > 0 && message.get_data.count("mask") > 0)
 	{
@@ -28,7 +28,7 @@ bool WebCPanel::NickServ::Cert::OnRequest(HTTPProvider *server, const Anope::str
 		params.push_back("DEL");
 		params.push_back(message.get_data["mask"]);
 
-		WebPanel::RunCommand(na->nc->display, na->nc, "NickServ", "nickserv/cert", params, replacements);
+		WebPanel::RunCommand(client, na->nc->display, na->nc, "NickServ", "nickserv/cert", params, replacements);
 	}
 
 	NSCertList *cl = na->nc->GetExt<NSCertList>("certificates");
@@ -40,4 +40,3 @@ bool WebCPanel::NickServ::Cert::OnRequest(HTTPProvider *server, const Anope::str
 	page.Serve(server, page_name, client, message, reply, replacements);
 	return true;
 }
-

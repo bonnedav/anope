@@ -1,6 +1,6 @@
 /*
  *
- * (C) 2008-2016 Anope Team
+ * (C) 2008-2019 Anope Team
  * Contact us at team@anope.org
  *
  * Please read COPYING and README for further details.
@@ -23,7 +23,7 @@ namespace Language
 	 * and we detect a language file exists for at least one of the supported
 	 * languages for the module, then we add the module's domain (its name)
 	 * here.
-	 * 
+	 *
 	 * When strings are translated they are checked against all domains.
 	 */
 	extern std::vector<Anope::string> Domains;

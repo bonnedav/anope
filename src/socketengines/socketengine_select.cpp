@@ -1,6 +1,6 @@
 /*
  *
- * (C) 2003-2016 Anope Team
+ * (C) 2003-2019 Anope Team
  * Contact us at team@anope.org
  *
  * Please read COPYING and README for further details.
@@ -46,7 +46,7 @@ void SocketEngine::Change(Socket *s, bool set, SocketFlag flag)
 	bool before_registered = s->flags[SF_READABLE] || s->flags[SF_WRITABLE];
 
 	s->flags[flag] = set;
-	
+
 	bool now_registered = s->flags[SF_READABLE] || s->flags[SF_WRITABLE];
 
 	if (!before_registered && now_registered)
@@ -146,4 +146,3 @@ void SocketEngine::Process()
 		}
 	}
 }
-

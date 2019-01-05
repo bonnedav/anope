@@ -1,3 +1,11 @@
+/*
+ *
+ * (C) 2013-2019 Anope Team
+ * Contact us at team@anope.org
+ *
+ * Please read COPYING and README for further details.
+ */
+
 #include "irc2sql.h"
 
 void IRC2SQL::CheckTables()
@@ -73,8 +81,8 @@ void IRC2SQL::CheckTables()
 			"`comment` varchar(255) NOT NULL,"
 			"`link_time` datetime DEFAULT NULL,"
 			"`split_time` datetime DEFAULT NULL,"
-			"`version` varchar(127) NOT NULL,"
-			"`currentusers` int(15) NOT NULL,"
+			"`version` varchar(127) DEFAULT NULL,"
+			"`currentusers` int(15) DEFAULT 0,"
 			"`online` enum('Y','N') NOT NULL DEFAULT 'Y',"
 			"`ulined` enum('Y','N') NOT NULL DEFAULT 'N',"
 			"PRIMARY KEY (`id`),"
@@ -87,7 +95,7 @@ void IRC2SQL::CheckTables()
 		query = "CREATE TABLE `" + prefix + "chan` ("
 			"`chanid` int(11) UNSIGNED NOT NULL AUTO_INCREMENT,"
 			"`channel` varchar(255) NOT NULL,"
-			"`topic` varchar(255) DEFAULT NULL,"
+			"`topic` varchar(512) DEFAULT NULL,"
 			"`topicauthor` varchar(255) DEFAULT NULL,"
 			"`topictime` datetime DEFAULT NULL,"
 			"`modes` varchar(512) DEFAULT NULL,"

@@ -1,6 +1,6 @@
 /* Main processing code for Services.
  *
- * (C) 2003-2016 Anope Team
+ * (C) 2003-2019 Anope Team
  * Contact us at team@anope.org
  *
  * Please read COPYING and README for further details.
@@ -50,7 +50,7 @@ void Anope::Process(const Anope::string &buffer)
 	static const Anope::string proto_name = ModuleManager::FindFirstOf(PROTOCOL) ? ModuleManager::FindFirstOf(PROTOCOL)->name : "";
 
 	MessageSource src(source);
-	
+
 	EventReturn MOD_RESULT;
 	FOREACH_RESULT(OnMessage, MOD_RESULT, (src, command, params));
 	if (MOD_RESULT == EVENT_STOP)
@@ -84,7 +84,7 @@ void IRCDProto::Parse(const Anope::string &buffer, Anope::string &source, Anope:
 	}
 
 	sep.GetToken(command);
-	
+
 	for (Anope::string token; sep.GetToken(token);)
 	{
 		if (token[0] == ':')
@@ -107,4 +107,3 @@ Anope::string IRCDProto::Format(const Anope::string &source, const Anope::string
 	else
 		return message;
 }
-

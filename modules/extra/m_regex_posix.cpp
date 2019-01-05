@@ -1,6 +1,6 @@
 /*
  *
- * (C) 2012-2016 Anope Team
+ * (C) 2012-2019 Anope Team
  * Contact us at team@anope.org
  *
  * Please read COPYING and README for further details.
@@ -17,7 +17,7 @@ class POSIXRegex : public Regex
  public:
 	POSIXRegex(const Anope::string &expr) : Regex(expr)
 	{
-		int err = regcomp(&this->regbuf, expr.c_str(), REG_EXTENDED | REG_NOSUB);
+		int err = regcomp(&this->regbuf, expr.c_str(), REG_EXTENDED | REG_NOSUB | REG_ICASE);
 		if (err)
 		{
 			char buf[BUFSIZE];

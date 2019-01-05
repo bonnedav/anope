@@ -1,6 +1,6 @@
 /*
  *
- * (C) 2012-2016 Anope Team
+ * (C) 2012-2019 Anope Team
  * Contact us at team@anope.org
  *
  * Please read COPYING and README for further details.
@@ -23,7 +23,7 @@ class PCRERegex : public Regex
 		int erroffset;
 		this->regex = pcre_compile(expr.c_str(), PCRE_CASELESS, &error, &erroffset, NULL);
 		if (!this->regex)
-			throw RegexException("Error in regex " + expr + " at offset " + stringify(erroffset) + ": " + error); 
+			throw RegexException("Error in regex " + expr + " at offset " + stringify(erroffset) + ": " + error);
 	}
 
 	~PCRERegex()

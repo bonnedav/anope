@@ -1,6 +1,6 @@
 /*
  *
- * (C) 2003-2016 Anope Team
+ * (C) 2003-2019 Anope Team
  * Contact us at team@anope.org
  *
  * Please read COPYING and README for further details.
@@ -78,6 +78,7 @@ namespace Configuration
 		File(const Anope::string &, bool);
 		~File();
 		const Anope::string &GetName() const;
+		Anope::string GetPath() const;
 
 		bool IsOpen() const;
 		bool Open();

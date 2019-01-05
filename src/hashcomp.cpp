@@ -1,7 +1,7 @@
 /*
  *
  * (C) 2002-2011 InspIRCd Development Team
- * (C) 2008-2016 Anope Team <team@anope.org>
+ * (C) 2008-2019 Anope Team <team@anope.org>
  *
  * Please read COPYING and README for further details.
  */
@@ -43,7 +43,7 @@ unsigned char Anope::toupper(unsigned char c)
  * which is a case-insensitive equivalent to std::string.
  *
  */
- 
+
 bool ci::ci_char_traits::eq(char c1st, char c2nd)
 {
 	return case_map_upper[static_cast<unsigned char>(c1st)] == case_map_upper[static_cast<unsigned char>(c2nd)];
@@ -161,4 +161,3 @@ bool sepstream::StreamEnd()
 {
 	return this->pos > this->tokens.length();
 }
-

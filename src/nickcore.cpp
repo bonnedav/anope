@@ -1,6 +1,6 @@
 /*
  *
- * (C) 2003-2016 Anope Team
+ * (C) 2003-2019 Anope Team
  * Contact us at team@anope.org
  *
  * Please read COPYING and README for further details.
@@ -31,15 +31,15 @@ NickCore::NickCore(const Anope::string &coredisplay) : Serializable("NickCore"),
 	(*NickCoreList)[this->display] = this;
 	if (old == NickCoreList->size())
 		Log(LOG_DEBUG) << "Duplicate account " << coredisplay << " in nickcore table?";
-	
+
 	FOREACH_MOD(OnNickCoreCreate, (this));
 }
 
 NickCore::~NickCore()
 {
-	UnsetExtensibles();
-
 	FOREACH_MOD(OnDelCore, (this));
+
+	UnsetExtensibles();
 
 	if (!this->chanaccess->empty())
 		Log(LOG_DEBUG) << "Non-empty chanaccess list in destructor!";
@@ -267,4 +267,3 @@ NickCore* NickCore::Find(const Anope::string &nick)
 
 	return NULL;
 }
-

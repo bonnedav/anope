@@ -1,6 +1,6 @@
 /*
  *
- * (C) 2011-2016 Anope Team
+ * (C) 2011-2019 Anope Team
  * Contact us at team@anope.org
  *
  * Please read COPYING and README for further details.
@@ -138,7 +138,16 @@ SQLiteService::SQLiteService(Module *o, const Anope::string &n, const Anope::str
 {
 	int db = sqlite3_open_v2(database.c_str(), &this->sql, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, 0);
 	if (db != SQLITE_OK)
-		throw SQL::Exception("Unable to open SQLite database " + database + ": " + sqlite3_errmsg(this->sql));
+	{
+		Anope::string exstr = "Unable to open SQLite database " + database;
+		if (this->sql)
+		{
+			exstr += ": ";
+			exstr += sqlite3_errmsg(this->sql);
+			sqlite3_close(this->sql);
+		}
+		throw SQL::Exception(exstr);
+	}
 }
 
 SQLiteService::~SQLiteService()
@@ -290,7 +299,7 @@ Query SQLiteService::BuildInsert(const Anope::string &table, unsigned int id, Da
 		*it->second >> buf;
 		query.SetValue(it->first, buf);
 	}
-	
+
 	return query;
 }
 
@@ -323,4 +332,3 @@ Anope::string SQLiteService::FromUnixtime(time_t t)
 }
 
 MODULE_INIT(ModuleSQLite)
-

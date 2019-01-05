@@ -1,6 +1,6 @@
 /* NickServ core functions
  *
- * (C) 2003-2016 Anope Team
+ * (C) 2003-2019 Anope Team
  * Contact us at team@anope.org
  *
  * Please read COPYING and README for further details.
@@ -119,7 +119,7 @@ class CommandNSList : public Command
 				++count;
 			}
 		}
-			
+
 		source.Reply(_("List of entries matching \002%s\002:"), pattern.c_str());
 
 		std::vector<Anope::string> replies;

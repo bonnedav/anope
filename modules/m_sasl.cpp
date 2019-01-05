@@ -1,6 +1,6 @@
 /*
  *
- * (C) 2014-2016 Anope Team
+ * (C) 2014-2019 Anope Team
  * Contact us at team@anope.org
  *
  * Please read COPYING and README for further details.
@@ -55,7 +55,7 @@ class Plain : public Mechanism
 				return;
 			}
 
-			SASL::IdentifyRequest *req = new SASL::IdentifyRequest(this->owner, m.source, acc, pass);
+			SASL::IdentifyRequest *req = new SASL::IdentifyRequest(this->owner, m.source, acc, pass, sess->hostname, sess->ip);
 			FOREACH_MOD(OnCheckAuthentication, (NULL, req));
 			req->Dispatch();
 		}
@@ -104,16 +104,20 @@ class External : public Mechanism
 				return;
 			}
 
+			Anope::string user = "A user";
+			if (!mysess->hostname.empty() && !mysess->ip.empty())
+				user = mysess->hostname + " (" + mysess->ip + ")";
+
 			NickCore *nc = certs->FindAccountFromCert(mysess->cert);
-			if (!nc || nc->HasExt("NS_SUSPENDED"))
+			if (!nc || nc->HasExt("NS_SUSPENDED") || nc->HasExt("UNCONFIRMED"))
 			{
-				Log(Config->GetClient("NickServ"), "sasl") << "A user failed to identify using certificate " << mysess->cert << " using SASL EXTERNAL";
+				Log(this->owner, "sasl", Config->GetClient("NickServ")) << user << " failed to identify using certificate " << mysess->cert << " using SASL EXTERNAL";
 				sasl->Fail(sess);
 				delete sess;
 				return;
 			}
 
-			Log(Config->GetClient("NickServ"), "sasl") << "A user identified to account " << nc->display << " using SASL EXTERNAL";
+			Log(this->owner, "sasl", Config->GetClient("NickServ")) << user << " identified to account " << nc->display << " using SASL EXTERNAL";
 			sasl->Succeed(sess, nc);
 			delete sess;
 		}
@@ -146,7 +150,7 @@ class SASLService : public SASL::Service, public Timer
 			}
 		}
 
-		Session* &session = sessions[m.source];
+		Session* session = GetSession(m.source);
 
 		if (m.type == "S")
 		{
@@ -160,14 +164,38 @@ class SASLService : public SASL::Service, public Timer
 				return;
 			}
 
-			if (!session)
-				session = mech->CreateSession(m.source);
+			Anope::string hostname, ip;
+			if (session)
+			{
+				// Copy over host/ip to mech-specific session
+				hostname = session->hostname;
+				ip = session->ip;
+				delete session;
+			}
+
+			session = mech->CreateSession(m.source);
+			if (session)
+			{
+				session->hostname = hostname;
+				session->ip = ip;
+
+				sessions[m.source] = session;
+			}
 		}
 		else if (m.type == "D")
 		{
 			delete session;
-			sessions.erase(m.source);
 			return;
+		}
+		else if (m.type == "H")
+		{
+			if (!session)
+			{
+				session = new Session(NULL, m.source);
+				sessions[m.source] = session;
+			}
+			session->hostname = m.data;
+			session->ip = m.ext;
 		}
 
 		if (session && session->mech)
@@ -261,7 +289,7 @@ class SASLService : public SASL::Service, public Timer
 			Session *s = it->second;
 			++it;
 
-			if (!s || !s->mech || s->created + 60 < Anope::CurTime)
+			if (!s || s->created + 60 < Anope::CurTime)
 			{
 				delete s;
 				sessions.erase(key);

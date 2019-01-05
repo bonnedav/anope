@@ -1,6 +1,6 @@
 /*
  *
- * (C) 2003-2016 Anope Team
+ * (C) 2003-2019 Anope Team
  * Contact us at team@anope.org
  *
  * Please read COPYING and README for further details.
@@ -56,8 +56,8 @@ class DNSBLResolver : public Request
 			return;
 
 		const ResourceRecord &ans_record = record->answers[0];
-		// Replies should be in 127.0.0.0/24
-		if (ans_record.rdata.find("127.0.0.") != 0)
+		// Replies should be in 127.0.0.0/8
+		if (ans_record.rdata.find("127.") != 0)
 			return;
 
 		sockaddrs sresult;
@@ -99,7 +99,7 @@ class DNSBLResolver : public Request
 class ModuleDNSBL : public Module
 {
 	std::vector<Blacklist> blacklists;
-	std::set<Anope::string> exempts;
+	std::set<cidr> exempts;
 	bool check_on_connect;
 	bool check_on_netburst;
 	bool add_to_akill;
@@ -146,7 +146,10 @@ class ModuleDNSBL : public Module
 
 		this->exempts.clear();
 		for (int i = 0; i < block->CountBlock("exempt"); ++i)
-			this->exempts.insert(block->Get<Anope::string>("ip"));
+		{
+			Configuration::Block *bl = block->GetBlock("exempt", i);
+			this->exempts.insert(bl->Get<Anope::string>("ip"));
+		}
 	}
 
 	void OnUserConnect(User *user, bool &exempt) anope_override
@@ -157,25 +160,26 @@ class ModuleDNSBL : public Module
 		if (!this->check_on_netburst && !user->server->IsSynced())
 			return;
 
-		/* At this time we only support IPv4 */
-		if (!user->ip.valid() || user->ip.sa.sa_family != AF_INET)
-			/* User doesn't have a valid IPv4 IP (ipv6/spoof/etc) */
+		if (!user->ip.valid())
+			/* User doesn't have a valid IP (spoof/etc) */
+			return;
+
+		if (this->blacklists.empty())
 			return;
 
 		if (this->exempts.count(user->ip.addr()))
+		{
+			Log(LOG_DEBUG) << "User " << user->nick << " is exempt from dnsbl check - ip: " << user->ip.addr();
 			return;
+		}
 
-		const unsigned long &ip = user->ip.sa4.sin_addr.s_addr;
-		unsigned long reverse_ip = (ip << 24) | ((ip & 0xFF00) << 8) | ((ip & 0xFF0000) >> 8) | (ip >> 24);
-
-		sockaddrs reverse = user->ip;
-		reverse.sa4.sin_addr.s_addr = reverse_ip;
+		Anope::string reverse = user->ip.reverse();
 
 		for (unsigned i = 0; i < this->blacklists.size(); ++i)
 		{
 			const Blacklist &b = this->blacklists[i];
 
-			Anope::string dnsbl_host = reverse.addr() + "." + b.name;
+			Anope::string dnsbl_host = reverse + "." + b.name;
 			DNSBLResolver *res = NULL;
 			try
 			{
@@ -192,4 +196,3 @@ class ModuleDNSBL : public Module
 };
 
 MODULE_INIT(ModuleDNSBL)
-
